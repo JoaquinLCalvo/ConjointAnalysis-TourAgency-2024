@@ -6,7 +6,8 @@ required_packages <- c(
   "lmtest", "Formula", "MASS", "rbibutils", "munsell", "pillar", "tzdb",
   "rlang", "utf8", "stringi", "timechange", "cli", "withr", "magrittr",
   "Rdpack", "grid", "hms", "lifecycle", "vctrs", "glue", "zoo", "fansi",
-  "colorspace", "tools", "pkgconfig"
+  "colorspace", "tools", "pkgconfig", "evaluate", "knitr", "htmltools",
+  "rmarkdown", "fastmap", "evaluate", "xfun", "rstudioapi"
 )
 
 # Function to install missing packages
@@ -20,3 +21,6 @@ install_missing_packages <- function(packages) {
 
 # Install the required packages
 install_missing_packages(required_packages)
+
+# Clean environment
+rm(required_packages, install_missing_packages)

@@ -161,9 +161,9 @@ coef(model3) / coef(model3)["as.numeric(as.character(Price))"]
 # Given the disparities between the part worths and the WTP tables, it would be 
 # fair to assume that we face, on average, a set of respondents with high
 # sensitivity towards cost. That is, on abstract they have certain tastes, but when it
-# comes the time of paying their choices change a lot. 
+# comes the time of paying, their choices change a lot. 
 
-# Define the function to predict from the MNL
+# Defining the function to predict from the MNL
 predict.mnl <- function(model, data) {
   data.model <- model.matrix(update(model$formula, 0 ~ .), data = data)[,-1]
   logitUtility <- data.model%*%model$coef
@@ -171,10 +171,7 @@ predict.mnl <- function(model, data) {
   cbind(share, data)
 }
 
-# In order to use "predict.mnl", you need to define a data frame containing the set of designs 
-# for which you want to predict the preference shares. 
-# One way to do this is to create the full set of possible designs
-# using expand.grid() and select the designs we want by row number
+# Defining the data frame containing the set of possible designs 
 attributes <- list(
   Price = unique(vacation$Price),
   Duration = unique(vacation$Duration),
@@ -186,7 +183,7 @@ allDesign <- expand.grid(attributes)
 options(max.print = 3000)
 allDesign
 
-#4 heterogeneous designs for each destination
+# 4 heterogeneous designs for each destination
 new.data <- allDesign[c(3, 24, 59, 95,
                         115, 146, 200, 205,
                         231, 256, 279, 298,
@@ -194,40 +191,6 @@ new.data <- allDesign[c(3, 24, 59, 95,
 new.data
 
 predict.mnl(model2, new.data)
-
-
-
-
-
-###################
-# Sensitivity Chart
-###################
-
-sensitivity.mnl <- function(model, attrib, base.data, competitor.data) {
-  data <- rbind(base.data, competitor.data)
-  base.share <- predict.mnl(model, data)[1,1]
-  share <- NULL
-  for (a in seq_along(attrib)) {
-    for (i in attrib[[a]]) {
-      data[1,] <- base.data
-      data[1,a] <- i
-      share <- c(share, predict.mnl(model, data)[1,1])
-    }
-  }
-  data.frame(level=unlist(attrib), share=share, increase=share-base.share)
-}
-base.data <- new.data[1,]
-competitor.data <- new.data[-1,]
-(tradeoff <- sensitivity.mnl(model2, attributes, base.data, competitor.data))
-
-barplot(tradeoff$increase, horiz=FALSE, names.arg=tradeoff$level,
-        ylab="Change in Share for the Planned Product Design", 
-        ylim=c(-0.1,0.11))
-grid(nx=NA, ny=NULL)
-
-
-
-
 
 
 ########################################
@@ -286,14 +249,35 @@ plot(Price2500.distr)
 model2.mixed2 <- update(model2.mixed, correlation = TRUE)
 summary(model2.mixed2)
 
-summary(vcov(m2.mixed2, what = "rpar", type = "cor"))
+
+#NOTE: This should be placed in the final analysis part.
+summary(vcov(model2.mixed2, what = "rpar", type = "cor"))
+
+# INTERPRETATION
+# 1. There are high correlations between the preferences for the following pairs
+# of destinations: Portugal-Spain, Portugal-Turkey, Spain-Turkey. Two possible managerial
+# decisions can be extracted from these data points: A. the possibility of offering a trip
+# that combines two of these (which would be particularly practical en the case of
+# Spain and Portugal). B. Once a client purchases one of those options (say Turkey)
+# we should offer him/her another trip to either Spain or Portugal (and repeat the
+# same logic for the other correlations between Destinations).
+# 2. On standard deviations: A. The only thing we can be absolutely certain about is that 
+# there is low variability on people preferring low prices (sd.Price800, low std, high p-value)
+# B. ALL the other features contain high variability, confirmed by the low p-values,
+# in this context we should: i. Accommodation: split tours between luxury and budget ones, 
+# ii. Same with transportation, high variability, iii. Destination: different destinations
+# appeal to different types of customers (so here I would decide based on previous Preference Shares).
+# 3. The cor.Price1500:Price2500 supports the idea of creating a separate offer for luxury trips
+# 4. There is a strong correlation between Transportplane:Transporttrain, could be a good 
+# idea to combine these 2 means of transportation on a single tour.
+
 
 # Correlation Matrix
 corr_mat <- cov2cor(cov.mlogit(model2.mixed2))
 corr_mat
 
 #The professor manually picked the strongly correlated features, but since our matrix 
-# is massive, here is a function that does it for us:
+# is massive, here is a function that does it for us: (DELETE THIS COMMENT IN FINAL VERSION)
 
 # Function to extract strongly correlated features
 get_strong_correlations <- function(corr_mat, threshold = 0.7) {
@@ -320,7 +304,7 @@ lrtest(model2, model2.mixed) #Fixed effects vs. uncorrelated random effects ✅
 lrtest(model2.mixed, model2.mixed2) #Uncorrelated random effects vs. all correlated random effects ✅
 lrtest(model2.mixed3, model2.mixed2) #partially correlated random effects vs. all correlated random effects ✅
 
-# Winner: all correlated random effects MNL
+# Winner: all correlated random effects MNL (model2.mixed2)
 
 ################################
 ### SIMULATING PREFERENCE SHARES
@@ -343,6 +327,76 @@ predict.mixed.mnl <- function(model, data, nresp=1000) {
 
 set.seed(47)
 predict.mixed.mnl(model2.mixed2, data=new.data)
+
+
+#########################
+### 4- FINAL ANALYSIS ###
+#########################
+
+
+###################
+# Sensitivity Chart
+###################
+
+# TO-DO: The current sensitivity chart uses model2. Model2.mixed2 is the best fit, but 
+# I couldn't make it work with the mixed effects MNL. If someone were to be able would be great.
+
+sensitivity.mnl <- function(model, attrib, base.data, competitor.data) {
+  data <- rbind(base.data, competitor.data)
+  base.share <- predict.mnl(model, data)[1,1]
+  share <- NULL
+  for (a in seq_along(attrib)) {
+    for (i in attrib[[a]]) {
+      data[1,] <- base.data
+      data[1,a] <- i
+      share <- c(share, predict.mnl(model, data)[1,1])
+    }
+  }
+  data.frame(level=unlist(attrib), share=share, increase=share-base.share)
+}
+base.data <- new.data[1,]
+competitor.data <- new.data[-1,]
+tradeoff <- sensitivity.mnl(model2.mixed2, attributes, base.data, competitor.data)
+
+# Define labels with both attribute names and values for clarity
+tradeoff$labels <- paste0(rep(names(attributes), sapply(attributes, length)),
+                          "\n", tradeoff$level)
+
+# Plot with enhanced readability 
+# (perhaps we shouldcrop the variable names towards the final version to improve the visualization)
+barplot(tradeoff$increase, horiz=FALSE, names.arg=tradeoff$labels, las=2, 
+        ylab="Change in Share for the Planned Product Design", 
+        ylim=c(-0.1, 0.11), cex.names=0.7)
+grid(nx=NA, ny=NULL)
+
+# INTERPRETATION
+#The main insights that we can derive from the Sensitivity Chart are about the 
+#Destination. Having Portugal as a Destination would increase the Preference Share
+#by around 4%, followed by Spain with an increase of around 2% in the PS. While 
+#a vacation tour that were to include a 5-stars accommodation would be preferred 
+#by a non-negligible amount of respondents, the previous conclusions on the cost 
+#sensitivity of our sample led us to dismiss possible takeaways from that part 
+#of the visual.
+
+
+####################################################################################
+### EXTRA: Would be nice to create clusters with consumer segments
+### We did not cover this in classes, but IMO would be like the last
+### mile of this analytics process. Not that we establish the different
+### offers, but a clustering method to do it by itself and we just supervise it.
+####################################################################################
+
+
+
+
+
+
+
+
+
+
+
+
 
 ########################################################
 ### ASSESSING THE EFFECTS OF INDIVIDUAL-LEVEL PREDICTORS
@@ -381,6 +435,7 @@ t.test(seat8 ~ carpool, data=PW.ind) # heterogeneity about preference for 8-seat
 
 
 # MANAGERIAL DECISION: 
+
 
 
 

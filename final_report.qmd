@@ -38,27 +38,28 @@ The `echo: false` option disables the printing of code (only output is displayed
 -   Justification for modeling choices (e.g., attributes, levels, and model design).
 
 ## 3. Data Collection
-
 -   Data source: Option 1: Provided by the lecturer (mention specifics of the dataset).
 -   Challenges or limitations encountered during data collection.
 
-# 4. Results Presentation Ricardo 
-
+## 4. Data Description
 -   Summary statistics of the data (optional if meaningful).
+
+## 5. Results Presentation Ricardo 
+
 -   Presentation of estimations and findings (use graphs, tables, etc., to illustrate results).
 
-# 5. Interpretation Ricardo 
+## 6. Interpretation Ricardo 
 
 -   Discussion of the results:
     -   Key insights into consumer preferences.
     -   Relationships between attributes and consumer choices.
 
-# 6. Managerial Implications and Conclusions
+# 7. Managerial Implications and Conclusions
 
 -   Practical implications of the findings for decision-makers.
 -   Recommendations for stakeholders (e.g., product development, marketing strategies). Final conclusions summarizing the study.
 -   Final conclusions summarizing the study.
 
-# 7. References
+# 8. References
 
 -   Cite all references, including academic, literature, data sources, and tools used.

@@ -1,0 +1,64 @@
+---
+title: "project_report"
+format: html
+editor: visual
+---
+
+## Quarto
+
+Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
+
+## Running Code
+
+When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
+
+```{r}
+1 + 1
+```
+
+You can add options to executable code like this
+
+```{r}
+#| echo: false
+2 * 2
+```
+
+The `echo: false` option disables the printing of code (only output is displayed).
+
+## 1. Introduction
+
+-   Objective of the project.
+-   Description of the product/service under study.
+-   Relevance of studying consumer preferences for this product/service.
+
+## 2. Explanation of Methodology
+
+-   Chosen type of conjoint analysis (traditional or choice-based).
+-   Description of the empirical strategy.
+-   Justification for modeling choices (e.g., attributes, levels, and model design).
+
+## 3. Data Collection
+
+-   Data source: Option 1: Provided by the lecturer (mention specifics of the dataset).
+-   Challenges or limitations encountered during data collection.
+
+# 4. Results Presentation
+
+-   Summary statistics of the data (optional if meaningful).
+-   Presentation of estimations and findings (use graphs, tables, etc., to illustrate results).
+
+# 5. Interpretation
+
+-   Discussion of the results:
+    -   Key insights into consumer preferences.
+    -   Relationships between attributes and consumer choices.
+
+# 6. Managerial Implications and Conclusions
+
+-   Practical implications of the findings for decision-makers.
+-   Recommendations for stakeholders (e.g., product development, marketing strategies). Final conclusions summarizing the study.
+-   Final conclusions summarizing the study.
+
+# 7. References
+
+-   Cite all references, including academic, literature, data sources, and tools used.

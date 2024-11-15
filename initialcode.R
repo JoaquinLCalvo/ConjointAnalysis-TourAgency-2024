@@ -34,6 +34,7 @@ vacation %>%
   geom_histogram(bins = 30, fill = "skyblue", color = "black") +
   facet_wrap(~key, scales = "free") +
   theme_minimal()
+# The variables are not numeric, no point in this plot
 
 # Number of respondents = 250
 length(unique(vacation$resp.id))
@@ -42,7 +43,8 @@ length(unique(vacation$resp.id))
 table(vacation$resp.id) / 4
 
 # Distribution of the response variable
-table(vacation$alt[vacation$choice == 1]) # A bit left-sweked, right?
+table(vacation$alt[vacation$choice == 1]) # A bit left-sweked, right? 
+#it's balanced between the 4 options more or less (so no weird behavior)
 
 # Check the frequencies of attributes
 sapply(vacation[, 4:8], table) #it's balanced
@@ -58,6 +60,19 @@ vacation$Accommodation <- factor(vacation$Accommodation,
                                  levels = c("budget", "3stars", "5stars"))
 vacation$Transport <- as.factor(vacation$Transport)
 vacation$Destination <- as.factor(vacation$Destination)
+
+# Visualize Distributions of Categorical Variables
+vacation %>%
+  select_if(is.factor) %>%
+  gather() %>%
+  ggplot(aes(value)) +
+  geom_bar(fill = "skyblue", color = "black") +
+  facet_wrap(~key, scales = "free") +
+  geom_text(stat = "count", aes(label = ..count..), vjust = 1.5, color = "white", size = 4) +
+  xlab("") +
+  ylab("Count") +
+  theme_minimal()
+
 
 # Create the design matrix
 vacation_mlogit <- dfidx(vacation, idx = list(c("ques", "resp.id"), "alt"))
@@ -105,6 +120,8 @@ lrtest(model3, model2)
 # in my opinion we should consider the WTP above the part worths in terms of importance
 # towards our final managerial decisions.
 
+# Agree
+
 summary(model2)
 
 # ANALYSIS:
@@ -127,8 +144,6 @@ summary(model2)
 coef(model3) / coef(model3)["as.numeric(as.character(Price))"]
 
 # Interpretation (PART OF THE INTERPRETATION BELOW WAS DISPUTED ON THE TELEGRAM GROUP - TO BE SOLVED)
-
-
 
 # Duration: On average, an individual is willing to pay up to 1948.53 euros
 # more to have a 2-night vacation compared to a 5-night vacation
@@ -191,6 +206,8 @@ new.data <- allDesign[c(3, 24, 59, 95,
 new.data
 
 predict.mnl(model2, new.data)
+# why these vacation packages? how we explain the choice?
+# if 2 packages are too similar than shares are wrong
 
 
 ########################################
@@ -201,7 +218,7 @@ model2.rpar <- rep("n", length=length(model2$coef))
 names(model2.rpar) <- names(model2$coef)
 model2.rpar
 
-
+# Mixed MNL model with uncorrelated random effects
 model2.mixed <- mlogit(choice ~ Price + Duration + Accommodation +
                          Transport + Destination | -1, 
                    data = vacation_mlogit, 
@@ -215,7 +232,7 @@ plot(model2.mixed)
 #NOTE: Here I leave the code ready to analyze the random effects for each Price variable. 
 # We may decide to extend this for all pairs of attribute+level
 
-#1. PRICE 500
+#1. PRICE 500 (it does not work for the baseline level)
 Price500.distr <- rpar(model2.mixed, "Price500")
 summary(Price500.distr)
 mean(Price500.distr)
@@ -270,6 +287,14 @@ summary(vcov(model2.mixed2, what = "rpar", type = "cor"))
 # 3. The cor.Price1500:Price2500 supports the idea of creating a separate offer for luxury trips
 # 4. There is a strong correlation between Transportplane:Transporttrain, could be a good 
 # idea to combine these 2 means of transportation on a single tour.
+
+#cor.Price1500:Price2500                      0.018996 *  
+#cor.Price2500:Duration10                     0.007341 ** 
+#cor.Accommodation5stars:Transporttrain       0.044829 *  
+#cor.Transportplane:Transporttrain           7.095e-05 ***
+#cor.DestinationPortugal:DestinationSpain    < 2.2e-16 ***
+#cor.DestinationPortugal:DestinationTurkey   1.765e-06 ***
+#cor.DestinationSpain:DestinationTurkey      < 2.2e-16 ***
 
 
 # Correlation Matrix
@@ -356,7 +381,7 @@ sensitivity.mnl <- function(model, attrib, base.data, competitor.data) {
 }
 base.data <- new.data[1,]
 competitor.data <- new.data[-1,]
-tradeoff <- sensitivity.mnl(model2.mixed2, attributes, base.data, competitor.data)
+tradeoff <- sensitivity.mnl(model2, attributes, base.data, competitor.data)
 
 # Define labels with both attribute names and values for clarity
 tradeoff$labels <- paste0(rep(names(attributes), sapply(attributes, length)),

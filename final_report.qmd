@@ -42,12 +42,12 @@ The `echo: false` option disables the printing of code (only output is displayed
 -   Data source: Option 1: Provided by the lecturer (mention specifics of the dataset).
 -   Challenges or limitations encountered during data collection.
 
-# 4. Results Presentation
+# 4. Results Presentation Ricardo 
 
 -   Summary statistics of the data (optional if meaningful).
 -   Presentation of estimations and findings (use graphs, tables, etc., to illustrate results).
 
-# 5. Interpretation
+# 5. Interpretation Ricardo 
 
 -   Discussion of the results:
     -   Key insights into consumer preferences.

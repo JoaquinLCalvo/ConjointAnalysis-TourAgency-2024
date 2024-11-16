@@ -20,7 +20,6 @@ library(MASS)
 
 ```
 
-
 ```{r}
 #| echo: false
 
@@ -97,26 +96,48 @@ vacation_mlogit
 
 ```
 
-
-
-
-
 ## 1. Introduction
 
--   Objective of the project.
--   Description of the product/service under study.
--   Relevance of studying consumer preferences for this product/service.
+Understanding consumer preferences is crucial for designing products and services that resonate with target audiences. Conjoint analysis is a widely used method for modeling decision-making processes, enabling researchers to quantify the importance of different product attributes and the trade-offs consumers are willing to make. By presenting respondents with hypothetical scenarios, this approach allows for a detailed exploration of how specific features influence choices.
 
-## 2. Explanation of Methodology (Borto)
+This project focuses on vacation planning, a domain where consumer decisions are influenced by a range of factors, including price, duration, accommodation, transport, and destination. The goal of the analysis is to identify the key drivers of consumer preferences for vacation packages and to provide actionable insights for the travel and tourism industry. These insights can help businesses design offerings that better meet the needs and expectations of potential customers.
 
--   Chosen type of conjoint analysis (traditional or choice-based).
--   Description of the empirical strategy.
--   Justification for modeling choices (e.g., attributes, levels, and model design).
+## 2. Data Collection and Methodology
 
-## 3. Data Collection (Borto)
+The dataset for this study was provided by the course professor and is specifically designed to simulate consumer decision-making in vacation planning. It is organized in a long format, a standard structure for Choice-Based Conjoint (CBC) analysis, where:
 
--   Data source: Option 1: Provided by the lecturer (mention specifics of the dataset).
--   Challenges or limitations encountered during data collection.
+-   **Respondent ID (`resp.id`)**: Identifies each participant.
+
+-   **Choice Task ID (`ques`)**: Identifies each decision-making scenario (choice task) presented to respondents.
+
+-   **Alternative ID (`alt`)**: Represents each vacation package alternative within a choice task.
+
+-   **Attributes and Levels**:
+
+    -   **Price**: Cost of the package (`$500`, `$800`, `$1500`, `$2500`).
+
+    -   **Duration**: Vacation length (e.g., `2 days`, `5 days`, `10 days`).
+
+    -   **Accommodation**: Type of lodging (`budget`,`3-stars`, `5-stars`).
+
+    -   **Transport**: Mode of transport (`bus`, `train`, `plane`).
+
+    -   **Destination**: Vacation destination (`Greece`, `Turkey`,`Portugal`, `Spain`).
+
+-   **Choice Indicator (`choice`)**: A binary variable showing whether an alternative was selected (`1`) or not (`0`).
+
+Each respondent faced multiple choice tasks, with each task consisting of several vacation package alternatives. Respondents selected their preferred package in each task, and only one alternative per task is marked as chosen. This structure is well-suited for CBC analysis, which directly models such decision-making processes.
+
+```{r,echo=FALSE}
+# Load required packages
+library(knitr)
+library(kableExtra)
+
+# Display the first six entries in an aesthetic table
+kable(head(vacation, 10), format = "html", table.attr = "style='width:70%; margin:auto;'") %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"))
+
+```
 
 ## 4. Data Description (Borto)
 

@@ -13,7 +13,7 @@ library(dplyr)
 library(MASS)
 
 # Load the data
-vacation <- read.csv("CBC_Vacation_data.csv", header = TRUE, sep = ";")
+vacation <- read.csv("./CBC_Vacation_data.csv", header = TRUE, sep = ";")
 View(vacation)
 
 #### 1- EDA ####

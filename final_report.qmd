@@ -139,15 +139,60 @@ kable(head(vacation, 10), format = "html", table.attr = "style='width:70%; margi
 
 ```
 
+### Maybe add an analysis like on slide 8\~10
+
 ## 4. Data Description (Borto)
 
 -   Summary statistics of the data (optional if meaningful).
 
-## 5. Results Presentation (Ricardo)
+## 5. - Model Fitting (Ricardo)
 
--   Presentation of estimations and findings (use graphs, tables, etc., to illustrate results).
+This study aims to examine the relationship between consumer choice and product attributes, focusing on understanding why a consumer selects a particular package based on the characteristics of the options presented. To achieve this, we employ a discrete choice model, specifically a multinomial logit regression.
 
-## 6. Interpretation (Ricardo)
+We begin by assessing the dataset, which captures respondents' choices among four available alternatives. The dependent variable, *choice*, is a categorical variable with four levels. To appropriately model this type of data, we utilize a Multinomial Logit Model (MNL).
+
+On an initial light analysis, the summary for our first model `model1` has intuitive responses. As the price increases, the estimate for the attribute `Price` gains a more negative value. A deeper analysis is performed in the Results and Interpretations section.
+
+The alternative-specific constants represent preferences for the positions of the alternatives within each question. Specifically, the parameters `(Intercept):2`, `(Intercept):3`, and `(Intercept):4` quantify the preference for each position from left to right relative to the first position on the left.
+
+The estimated MNL model indicates that these intercepts are very small and not statistically significant. To improve model parsimony and precision, we have chosen to exclude these intercepts from the analysis, thereby reducing the degrees of freedom.
+
+```{r,echo=FALSE}
+model1 <- mlogit(choice ~ Price + Duration + Accommodation +
+                   Transport + Destination,
+                 data = vacation_mlogit)
+summary(model1)
+```
+
+We formally evaluate the decision to remove the intercepts using a likelihood ratio test. This involves comparing the larger model `model1`, which includes the intercepts, with the smaller model `model2` that excludes them.
+
+The comparison between the full model and the reduced model without intercepts yields a p-value of `0.7185` . Given this high p-value, we conclude that there is no significant difference in goodness of fit between the two models, indicating that both explain the data equally well. Consequently, the alternative-specific constants are not essential for adequately modeling the data.
+
+```{r,echo=FALSE}
+# Fit the model without intercept parameters
+model2 <- mlogit(choice ~ Price + Duration + Accommodation +
+                   Transport + Destination | -1,
+                 data = vacation_mlogit)
+summary(model2)
+
+# Likelihood ratio test
+lrtest(model2, model1)
+```
+
+We continue to explore opportunities to simplify the model. In the previous analysis, the attribute *price* was treated as a qualitative variable. We now incorporate it as a quantitative predictor in order to understand if the the model's efficiency and interpretability is enhanced.
+
+```{r,echo=FALSE}
+# Fit the model without intercept and price as a quantitative variable
+model3 <- mlogit(choice ~ as.numeric(as.character(Price)) +
+                   Duration + Accommodation + Transport + Destination | -1,
+                 data = vacation_mlogit)
+summary(model3)
+lrtest(model3, model2)
+```
+
+Again, we formally evaluate the decision to transform the attribute from quantitative, to quantitative, using a likelihood ratio test. The null hypothesis for the likelihood ratio test for the comparisson between `model2` and `model3` asserts that the simpler model (Model 2) is sufficient, and that the added complexity of Model 3 does not result in a significant improvement in model fit. Given the extremely low p-value, we reject the null hypothesis and select Model 2 over Model 3.
+
+## 6. Results and Interpretations (Ricardo)
 
 -   Discussion of the results:
     -   Key insights into consumer preferences.

@@ -139,17 +139,11 @@ kable(head(vacation, 10), format = "html", table.attr = "style='width:70%; margi
 
 ```
 
-### Maybe add an analysis like on slide 8\~10
-
-## 4. Data Description (Borto)
-
--   Summary statistics of the data (optional if meaningful).
-
-## 5. - Model Fitting (Ricardo)
+## 4. - Model Fitting (Ricardo)
 
 This study aims to examine the relationship between consumer choice and product attributes, focusing on understanding why a consumer selects a particular package based on the characteristics of the options presented. To achieve this, we employ a discrete choice model, specifically a multinomial logit regression.
 
-We begin by assessing the dataset, which captures respondents' choices among four available alternatives. The dependent variable, *choice*, is a categorical variable with four levels. To appropriately model this type of data, we utilize a Multinomial Logit Model (MNL).
+We begin by assessing the dataset, which captures respondents' choices among four available alternatives. The dependent variable, *choice*, is a categorical variable with two levels (1 = chosen, 0 = not chosen) . To appropriately model this type of data, we utilize a Multinomial Logit Model (MNL).
 
 On an initial light analysis, the summary for our first model `model1` has intuitive responses. As the price increases, the estimate for the attribute `Price` gains a more negative value. A deeper analysis is performed in the Results and Interpretations section.
 
@@ -192,18 +186,18 @@ lrtest(model3, model2)
 
 Again, we formally evaluate the decision to transform the attribute from quantitative, to quantitative, using a likelihood ratio test. The null hypothesis for the likelihood ratio test for the comparisson between `model2` and `model3` asserts that the simpler model (Model 2) is sufficient, and that the added complexity of Model 3 does not result in a significant improvement in model fit. Given the extremely low p-value, we reject the null hypothesis and select Model 2 over Model 3.
 
-## 6. Results and Interpretations (Ricardo)
+## 5. Results and Interpretations (Ricardo)
 
 -   Discussion of the results:
     -   Key insights into consumer preferences.
     -   Relationships between attributes and consumer choices.
 
-# 7. Managerial Implications and Conclusions
+# 6. Managerial Implications and Conclusions
 
 -   Practical implications of the findings for decision-makers.
 -   Recommendations for stakeholders (e.g., product development, marketing strategies). Final conclusions summarizing the study.
 -   Final conclusions summarizing the study.
 
-# 8. References
+# 7. References
 
 -   Cite all references, including academic, literature, data sources, and tools used.

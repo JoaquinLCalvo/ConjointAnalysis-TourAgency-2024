@@ -141,33 +141,26 @@ summary(model2)
 
 
 # Willingness to pay
-coef(model3) / coef(model3)["as.numeric(as.character(Price))"]
+- coef(model3) / coef(model3)["as.numeric(as.character(Price))"]
 
-# Interpretation (PART OF THE INTERPRETATION BELOW WAS DISPUTED ON THE TELEGRAM GROUP - TO BE SOLVED)
+# Interpretation (final)
 
-# Duration: On average, an individual is willing to pay up to 1948.53 euros
-# more to have a 2-night vacation compared to a 5-night vacation
-# and 1312.81 euros more for a 2-night vacation compared to a 10-night vacation.
-# Accommodation: Respondents would need about 555.5628 euros in compensation
-# to choose a budget accommodation over a 3-star accommodation.
-# Similarly, respondents would need 2219.0904 euros in compensation
-# to choose a budget accommodation over a 5-star accommodation.
-# Transport: Respondents would need approximately 848.05 euros in compensation
-# to choose a bus over a plane.
-# On average, respondents are willing to pay 386.12 euros more
-# to take a bus instead of a train.
-# Destination: Respondents would need significant compensation
-# (2817.9713 euros) to choose Greece as a destination over Portugal.
-# Similarly, respondents would need 1947.5294 euros compensation
-# to choose Greece over Spain.
-# Less compensation is required to choose Greece over Turkey,
-# with a value of 790.8334 euros.
+# DURATION: On average, respondents are willing to pay up to 1948.53 euros
+# more to have a 2-night vacation instead of a 5-night vacation and up to
+# 1312.81 euros more for a 2-night vacation instead of a 10-night vacation.
+# ACCOMMODATION: Customers are willing to pay 555.56 euros more for a 3-star
+# hotel than for a budget hotel. Similarly, they are willing to pay 2219.09
+# euros more for a 5-star hotel than for a budget hotel.
+# TRANSPORT: Respondents are willing to pay 848.05 euros more to take
+# a plane instead of a bus, however, they are willing to pay 386.12 euros more
+# for a bus instead of a train.
+# DESTINATION: Customers are willing to pay 2817.97 euros more to go to Portugal
+# instead of Greece, 1947.53 euros more to go to Spain instead of Greece, and
+# 790.83 euros more to go to Turkey instead of Greece.
 
 # Summary
-# Respondents are willing to pay more for shorter vacations,
-# require compensation to choose budget hotels over 3-star or 5-star hotels,
-# prefer planes to buses, but are willing to pay more for buses over trains,
-# and would need a compensation to choose Greece over Portugal, Spain or Turkey.
+# Respondents are willing to pay more for shorter 2-night vacations,
+# 5-star hotels, plane transportation, and trips to Portugal or Spain.
 
 
 #NEW (FROM HERE ON, IT'S ONLY JOACO'S CODE AND TEXT)

@@ -139,11 +139,17 @@ kable(head(vacation, 10), format = "html", table.attr = "style='width:70%; margi
 
 ```
 
-## 4. - Model Fitting (Ricardo)
+### Maybe add an analysis like on slide 8\~10
+
+## 4. Data Description (Borto)
+
+-   Summary statistics of the data (optional if meaningful).
+
+## 5. - Model Fitting (Ricardo)
 
 This study aims to examine the relationship between consumer choice and product attributes, focusing on understanding why a consumer selects a particular package based on the characteristics of the options presented. To achieve this, we employ a discrete choice model, specifically a multinomial logit regression.
 
-We begin by assessing the dataset, which captures respondents' choices among four available alternatives. The dependent variable, *choice*, is a categorical variable with two levels (1 = chosen, 0 = not chosen) . To appropriately model this type of data, we utilize a Multinomial Logit Model (MNL).
+We begin by assessing the dataset, which captures respondents' choices among four available alternatives. The dependent variable, *choice*, is a categorical variable with four levels. To appropriately model this type of data, we utilize a Multinomial Logit Model (MNL).
 
 On an initial light analysis, the summary for our first model `model1` has intuitive responses. As the price increases, the estimate for the attribute `Price` gains a more negative value. A deeper analysis is performed in the Results and Interpretations section.
 
@@ -184,20 +190,36 @@ summary(model3)
 lrtest(model3, model2)
 ```
 
-Again, we formally evaluate the decision to transform the attribute from quantitative, to quantitative, using a likelihood ratio test. The null hypothesis for the likelihood ratio test for the comparisson between `model2` and `model3` asserts that the simpler model (Model 2) is sufficient, and that the added complexity of Model 3 does not result in a significant improvement in model fit. Given the extremely low p-value, we reject the null hypothesis and select Model 2 over Model 3.
+Again, we formally evaluate the decision to transform the attribute from quantitative, to quantitative, using a likelihood ratio test. The null hypothesis for the likelihood ratio test for the comparison between `model2` and `model3` asserts that the simpler model (Model 2) is sufficient, and that the added complexity of Model 3 does not result in a significant improvement in model fit. Given the extremely low p-value, we reject the null hypothesis and select Model 2 over Model 3.
 
-## 5. Results and Interpretations (Ricardo)
+## 6. Results and Interpretations (Ricardo)
 
 -   Discussion of the results:
     -   Key insights into consumer preferences.
     -   Relationships between attributes and consumer choices.
 
-# 6. Managerial Implications and Conclusions
+### Interpretation of the selected model (model2).
+
+The selected model reveals preferences among the respondents. We observe a clear price sensitivity, as the prices increase, the likelihood of selection decreases. Regarding the duration of the offered options, the most favored option is a short 2 night trip, followed by a longer 10 night trip. The intermediate 5 day trip is the least preferred. Accommodation preferences show a strong inclination towards 5-star hotels, followed by 3-star. Low cost options are ranked lowest. For transportation options, planes are most preferred, followed by bus and trains being the least desirable. Regarding the destination, the most preferred country is Portugal, followed by Spain and then Turkey. Greece is the least desirable destination.
+
+### Willingness to Pay
+
+We can further our interpretation of the model by calculating the willingness to pay for each level's attribute utilizing the 3rd proposed model that treats price as a quantitative attribute. The results represent the monetary value that respondents are willing to pay for changes in each attribute.
+
+```{r,echo=FALSE}
+- coef(model3) / coef(model3)["as.numeric(as.character(Price))"]
+```
+
+Upon analysis of the results, we find strong preferences on the monetary value respondents place on various vacation attributes. For trip duration, respondents are willing to pay up to €1948.53 more for a 2-night vacation instead of a 5-night vacation and €1312.81 more for a 2-night vacation instead of a 10-night vacation, showing a strong preference for shorter trips. Regarding accommodation, customers value high-end options significantly, being willing to pay €555.56 more for a 3-star hotel over a budget hotel and €2219.09 more for a 5-star hotel over a budget option. In terms of transportation, respondents are willing to pay €848.05 more to fly instead of taking a bus, while preferring a bus over a train by €386.12. Finally, regarding destination preferences, a customer is willing to pay €2817.97 more to visit Portugal over Greece, €1947.53 more to visit Spain over Greece, and €790.83 more to visit Turkey over Greece.
+
+In summary, respondents prefer 2-night vacations, 5-star hotels, plane travel, and destinations like Portugal and Spain, showing a clear willingness to pay more for convenience, luxury, and popular locations.
+
+# 7. Managerial Implications and Conclusions
 
 -   Practical implications of the findings for decision-makers.
 -   Recommendations for stakeholders (e.g., product development, marketing strategies). Final conclusions summarizing the study.
 -   Final conclusions summarizing the study.
 
-# 7. References
+# 8. References
 
 -   Cite all references, including academic, literature, data sources, and tools used.

@@ -214,6 +214,53 @@ Upon analysis of the results, we find strong preferences on the monetary value r
 
 In summary, respondents prefer 2-night vacations, 5-star hotels, plane travel, and destinations like Portugal and Spain, showing a clear willingness to pay more for convenience, luxury, and popular locations.
 
+### Preference Shares
+
+Given the disparities between the part worths and the WTP tables, it would be  fair to assume that we face, on average, a set of respondents with high sensitivity towards cost. That is, on abstract they have certain tastes, but when it comes the time of paying, their choices change a lot. To further assess this,another useful approach to assess the role of product attributes consists on using the model to obtain preference share predictions. By changing the levels’ attributes of the planned design we can observe how variations in the design influence the preference share.
+
+
+
+```{r,echo=FALSE}
+
+# Defining the function to predict from the MNL
+predict.mnl <- function(model, data) {
+  data.model <- model.matrix(update(model$formula, 0 ~ .), data = data)[,-1]
+  logitUtility <- data.model%*%model$coef
+  share <- exp(logitUtility)/sum(exp(logitUtility))
+  cbind(share, data)
+}
+
+# Defining the data frame containing the set of possible designs 
+attributes <- list(
+  Price = unique(vacation$Price),
+  Duration = unique(vacation$Duration),
+  Accommodation = unique(vacation$Accommodation),
+  Transport = unique(vacation$Transport),
+  Destination = unique(vacation$Destination)
+)
+allDesign <- expand.grid(attributes) 
+options(max.print = 3000)
+allDesign
+
+# 4 heterogeneous designs for each destination
+new.data <- allDesign[c(3, 24, 59, 95,
+                        115, 146, 200, 205,
+                        231, 256, 279, 298,
+                        331, 366, 401, 431), ] 
+new.data
+
+predict.mnl(model2, new.data)
+# why these vacation packages? how we explain the choice?
+# if 2 packages are too similar than shares are wrong
+
+
+
+
+```
+
+
+### Sensitivity Charts
+
 # 7. Managerial Implications and Conclusions
 
 -   Practical implications of the findings for decision-makers.

@@ -1,8 +1,27 @@
 ---
-title: "project_report"
-format: html
-editor: visual
+title: "Understanding Consumer Preferences for Vacation Packages: A Choice-Based Conjoint Analysis"
+authors:
+  - "Maria Starodubtseva (mariia.starodubtseva@studenti.unitn.it)"
+  - "Ricardo Esquivel D'Avanzo (r.esquiveldavanzo@studenti.unitn.it)"
+  - "Andrea Bortoluzzi (andrea.bortoluzzi-1@studenti.unitn.it)"
+  - "Joaquin Lopez Calvo (joaquin.lopezcalvo@studenti.unitn.it)"
+format:
+  pdf:
+    latex-engine: xelatex
+fontsize: 11pt
+geometry: margin=1in
 ---
+
+```{r setup}
+#| include: FALSE
+knitr::opts_chunk$set(warning=FALSE,
+                      message=FALSE,
+                      tidy.opts=list(width.cutoff = 80),
+                      tidy = TRUE,
+                      fig.align = "center")
+options(scipen = 999)
+# document setup
+```
 
 ```{r}
 #| echo: false
@@ -28,7 +47,7 @@ vacation <- read.csv("./CBC_Vacation_data.csv", header = TRUE, sep = ";")
 
 ```
 
-```{R}
+```{r}
 #### 1- Exploratory Data Analysis EDA ####
 
 # Check the data
@@ -133,9 +152,8 @@ library(knitr)
 library(kableExtra)
 
 # Display the first six entries in an aesthetic table
-kable(head(vacation, 10), format = "html", table.attr = "style='width:70%; margin:auto;'") %>%
-  kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"))
-
+kable(head(vacation, 10)) %>%
+  kable_styling(latex_options = c("striped", "scale_down"))
 ```
 
 ### Maybe add an analysis like on slide 8\~10
@@ -217,7 +235,7 @@ In summary, respondents prefer 2-night vacations, 5-star hotels, plane travel, a
 
 Given the disparities between the part worths and the WTP tables, it would be fair to assume that we face, on average, a set of respondents with high sensitivity towards cost. That is, on abstract they have certain tastes, but when it comes the time of paying, their choices change a lot.
 
-**COMMENT: Are we saying here that: The first row refers to the company’s planned design, while the other five rows represent the competitors’ products? I am a bit confused with the interpretation of this part. I'll continue with the other stuff and come back later.**
+**COMMENT: Are we saying here that: The first row refers to the company's planned design, while the other five rows represent the competitors' products? I am a bit confused with the interpretation of this part. I'll continue with the other stuff and come back later.**
 
 ```{r,echo=FALSE}
 
@@ -258,15 +276,13 @@ predict.mnl(model2, new.data)
 
 ### Preference Shares
 
-To further assess this,another useful approach to assess the role of product attributes consists on using the model to obtain preference share predictions. By changing the levels’ attributes of the planned design we can observe how variations in the design influence the preference shares.
+To further assess this,another useful approach to assess the role of product attributes consists on using the model to obtain preference share predictions. By changing the levels' attributes of the planned design we can observe how variations in the design influence the preference shares.
 
 ### Sensitivity Charts
 
 ### Modelling: Mixed MNL model
 
 The model includes random coefficients to account for individual heterogeneity in preferences, and the standard deviations of these random coefficients suggest considerable variation across respondents, particularly for price and duration preferences. The likelihood ratio test indicates that the inclusion of random coefficients improves the model's fit significantly, reinforcing the importance of accounting for individual differences in choice behavior. The analysis of the model reveals several interesting preferences among respondents. First, while the majority of individuals prefer shorter stays, approximately 10% actually favor 10-day stays over 2-day ones. Regarding accommodation, 17% of respondents prefer budget options over 3-star accommodations, yet 100% of respondents prefer 5-star hotels over budget options. In terms of transportation, 12% of respondents prefer traveling by bus over flying, and 65% prefer the bus to the train. When considering destinations, although everyone prefers Portugal and Spain over Greece, 21% of respondents actually prefer Greece to Turkey. Finally, the analysis shows a clear preference for cheaper options, as respondents consistently favor lower-priced choices across the board. These findings highlight the diversity in individual preferences, suggesting that there is significant variability in how different respondents evaluate the same attributes.
-
-
 
 ```{r,echo=FALSE}
 
@@ -282,6 +298,7 @@ model2.mixed <- mlogit(choice ~ Price + Duration + Accommodation +
 summary(model2.mixed)
 
 # Visual summary of the distribution of random effects and hence of the level of heterogeneity (ERASE THIS COMMENT IN FINAL VERSION)
+par(mfrow = c(3, 4), mar = c(2, 2, 2, 1))  # 3 rows and 4 columns, adjust margins
 plot(model2.mixed)
 #TO DO: Analyze this plot and understand why its results are so different from the professor's
 
@@ -294,44 +311,7 @@ plot(model2.mixed)
 
 ```
 
-
-
-
-```{r,echo=FALSE}
-
-#NOTE: Here I leave the code ready to analyze the random effects for each Price variable. 
-# We may decide to extend this for all pairs of attribute+level
-
-#1. PRICE 500
-Price500.distr <- rpar(model2.mixed, "Price500")
-summary(Price500.distr)
-mean(Price500.distr)
-med(Price500.distr)
-plot(Price500.distr)
-
-#2. PRICE 800
-Price800.distr <- rpar(model2.mixed, "Price800")
-summary(Price800.distr)
-mean(Price800.distr)
-med(Price800.distr)
-plot(Price800.distr)
-
-#3. PRICE 1500
-Price1500.distr <- rpar(model2.mixed, "Price1500")
-summary(Price1500.distr)
-mean(Price1500.distr)
-med(Price1500.distr)
-plot(Price1500.distr)
-
-#4. PRICE 2500
-Price2500.distr <- rpar(model2.mixed, "Price2500")
-summary(Price2500.distr)
-mean(Price2500.distr)
-med(Price2500.distr)
-plot(Price2500.distr)
-```
-
-###  Correlated Random Coefficients
+### Correlated Random Coefficients
 
 ```{r,echo=FALSE}
 
@@ -346,10 +326,6 @@ summary(vcov(model2.mixed2, what = "rpar", type = "cor"))
 
 
 ```
-
-
-
-
 
 # 7. Managerial Implications and Conclusions
 

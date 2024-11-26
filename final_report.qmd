@@ -274,12 +274,6 @@ predict.mnl(model2, new.data)
 
 ```
 
-### Preference Shares
-
-To further assess this,another useful approach to assess the role of product attributes consists on using the model to obtain preference share predictions. By changing the levels’ attributes of the planned design we can observe how variations in the design influence the preference shares.
-
-### Sensitivity Charts
-
 ### Modelling: Mixed MNL model
 
 The model includes random coefficients to account for individual heterogeneity in preferences, and the standard deviations of these random coefficients suggest considerable variation across respondents, particularly for price and duration preferences. The likelihood ratio test indicates that the inclusion of random coefficients improves the model's fit significantly, reinforcing the importance of accounting for individual differences in choice behavior. The analysis of the model reveals several interesting preferences among respondents. First, while the majority of individuals prefer shorter stays, approximately 10% actually favor 10-day stays over 2-day ones. Regarding accommodation, 17% of respondents prefer budget options over 3-star accommodations, yet 100% of respondents prefer 5-star hotels over budget options. In terms of transportation, 12% of respondents prefer traveling by bus over flying, and 65% prefer the bus to the train. When considering destinations, although everyone prefers Portugal and Spain over Greece, 21% of respondents actually prefer Greece to Turkey. Finally, the analysis shows a clear preference for cheaper options, as respondents consistently favor lower-priced choices across the board. These findings highlight the diversity in individual preferences, suggesting that there is significant variability in how different respondents evaluate the same attributes.
@@ -312,43 +306,9 @@ plot(model2.mixed)
 ```
 
 
+### Correlated Random Coefficients
 
-
-```{r,echo=FALSE}
-
-#NOTE: Here I leave the code ready to analyze the random effects for each Price variable. 
-# We may decide to extend this for all pairs of attribute+level
-
-#1. PRICE 500
-Price500.distr <- rpar(model2.mixed, "Price500")
-summary(Price500.distr)
-mean(Price500.distr)
-med(Price500.distr)
-plot(Price500.distr)
-
-#2. PRICE 800
-Price800.distr <- rpar(model2.mixed, "Price800")
-summary(Price800.distr)
-mean(Price800.distr)
-med(Price800.distr)
-plot(Price800.distr)
-
-#3. PRICE 1500
-Price1500.distr <- rpar(model2.mixed, "Price1500")
-summary(Price1500.distr)
-mean(Price1500.distr)
-med(Price1500.distr)
-plot(Price1500.distr)
-
-#4. PRICE 2500
-Price2500.distr <- rpar(model2.mixed, "Price2500")
-summary(Price2500.distr)
-mean(Price2500.distr)
-med(Price2500.distr)
-plot(Price2500.distr)
-```
-
-###  Correlated Random Coefficients
+To get a better sense of the strength of the association among random coefficients we extract a covariance matrix. We can further understand the preferences of the respondents and how they are correlated. First, there is a high correlation between the following pairs of destinations: "Portugal-Spain", "Portugal-Turkey", "Spain-Turkey". This provides insights about new options that can be offered combining these options. Second, the low variability in preferences for low prices indicates a universal preference for cheaper options, all respondents prefer to pay less. All the other features contain high variability, confirmed by the low p-values, suggesting that tailored packages appealing to distinct customers are portential option. Additionally, the positive correlation between "Price1500" and "Price2500" supports the idea of creating a separate offer for luxury trips, Lastly, there is a strong correlation between "Transportplane" and "Transporttrain". This suggest potential for creating a combined transportation package.
 
 ```{r,echo=FALSE}
 
@@ -359,8 +319,132 @@ summary(model2.mixed2)
 
 #NOTE: This should be placed in the final analysis part.
 summary(vcov(model2.mixed2, what = "rpar", type = "cor"))
+```
 
 
+```
+
+```{r,echo=FALSE}
+
+
+
+# Correlation Matrix
+corr_mat <- cov2cor(cov.mlogit(model2.mixed2))
+corr_mat
+
+#The professor manually picked the strongly correlated features, but since our matrix 
+# is massive, here is a function that does it for us: (DELETE THIS COMMENT IN FINAL VERSION)
+
+# Function to extract strongly correlated features
+get_strong_correlations <- function(corr_mat, threshold = 0.7) {
+  # Find indices of correlations above threshold or below -threshold
+  high_corr_indices <- which(abs(corr_mat) > threshold, arr.ind = TRUE)
+  
+  # Filter out self-correlations (where row index equals column index)
+  high_corr_indices <- high_corr_indices[high_corr_indices[, 1] != high_corr_indices[, 2], ]
+  
+  # Get the unique feature names from the row and column indices
+  features <- unique(c(rownames(corr_mat)[high_corr_indices[, 1]], 
+                       colnames(corr_mat)[high_corr_indices[, 2]]))
+  
+  return(features)
+}
+
+strongly_correlated_features <- get_strong_correlations(corr_mat)
+print(strongly_correlated_features)
+
+model2.mixed3 <- update(model2.mixed2, correlation = strongly_correlated_features)
+
+#Below, the model with the check mark emoji is the winner
+lrtest(model2, model2.mixed) #Fixed effects vs. uncorrelated random effects ✅
+lrtest(model2.mixed, model2.mixed2) #Uncorrelated random effects vs. all correlated random effects ✅
+lrtest(model2.mixed3, model2.mixed2) #partially correlated random effects vs. all correlated random effects ✅
+
+# Winner: all correlated random effects MNL (model2.mixed2)
+
+
+```
+
+### Preference Shares
+
+To further assess this,another useful approach to assess the role of product attributes consists on using the model to obtain preference share predictions. By changing the levels’ attributes of the planned design we can observe how variations in the design influence the preference shares.
+
+```{r,echo=FALSE}
+################################
+### SIMULATING PREFERENCE SHARES
+################################
+
+
+predict.mixed.mnl <- function(model, data, nresp=1000) {
+  data.model <- model.matrix(update(model$formula, 0 ~ .), data = data)[,-1]
+  coef.Sigma <- cov.mlogit(model)
+  coef.mu <- model$coef[1:dim(coef.Sigma)[1]]
+  draws <- mvrnorm(n=nresp, coef.mu, coef.Sigma)
+  shares <- matrix(NA, nrow=nresp, ncol=nrow(data))
+  for (i in 1:nresp) {
+    utility <- data.model%*%draws[i,]
+    share = exp(utility)/sum(exp(utility))
+    shares[i,] <- share
+  }
+  cbind(colMeans(shares), data)
+}
+
+set.seed(47)
+predict.mixed.mnl(model2.mixed2, data=new.data)
+
+
+
+
+```
+
+### Sensitivity Charts
+
+```{r,echo=FALSE}
+
+
+###################
+# Sensitivity Chart
+###################
+
+# TO-DO: The current sensitivity chart uses model2. Model2.mixed2 is the best fit, but 
+# I couldn't make it work with the mixed effects MNL. If someone were to be able would be great.
+
+sensitivity.mnl <- function(model, attrib, base.data, competitor.data) {
+  data <- rbind(base.data, competitor.data)
+  base.share <- predict.mnl(model, data)[1,1]
+  share <- NULL
+  for (a in seq_along(attrib)) {
+    for (i in attrib[[a]]) {
+      data[1,] <- base.data
+      data[1,a] <- i
+      share <- c(share, predict.mnl(model, data)[1,1])
+    }
+  }
+  data.frame(level=unlist(attrib), share=share, increase=share-base.share)
+}
+base.data <- new.data[1,]
+competitor.data <- new.data[-1,]
+tradeoff <- sensitivity.mnl(model2, attributes, base.data, competitor.data)
+
+# Define labels with both attribute names and values for clarity
+tradeoff$labels <- paste0(rep(names(attributes), sapply(attributes, length)),
+                          "\n", tradeoff$level)
+
+# Plot with enhanced readability 
+# (perhaps we shouldcrop the variable names towards the final version to improve the visualization)
+barplot(tradeoff$increase, horiz=FALSE, names.arg=tradeoff$labels, las=2, 
+        ylab="Change in Share for the Planned Product Design", 
+        ylim=c(-0.1, 0.11), cex.names=0.7)
+grid(nx=NA, ny=NULL)
+
+# INTERPRETATION
+#The main insights that we can derive from the Sensitivity Chart are about the 
+#Destination. Having Portugal as a Destination would increase the Preference Share
+#by around 4%, followed by Spain with an increase of around 2% in the PS. While 
+#a vacation tour that were to include a 5-stars accommodation would be preferred 
+#by a non-negligible amount of respondents, the previous conclusions on the cost 
+#sensitivity of our sample led us to dismiss possible takeaways from that part 
+#of the visual.
 
 ```
 

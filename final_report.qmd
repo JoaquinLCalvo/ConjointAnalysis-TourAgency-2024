@@ -276,7 +276,7 @@ predict.mnl(model2, new.data)
 
 ### Preference Shares
 
-To further assess this,another useful approach to assess the role of product attributes consists on using the model to obtain preference share predictions. By changing the levels' attributes of the planned design we can observe how variations in the design influence the preference shares.
+To further assess this,another useful approach to assess the role of product attributes consists on using the model to obtain preference share predictions. By changing the levels’ attributes of the planned design we can observe how variations in the design influence the preference shares.
 
 ### Sensitivity Charts
 
@@ -311,7 +311,44 @@ plot(model2.mixed)
 
 ```
 
-### Correlated Random Coefficients
+
+
+
+```{r,echo=FALSE}
+
+#NOTE: Here I leave the code ready to analyze the random effects for each Price variable. 
+# We may decide to extend this for all pairs of attribute+level
+
+#1. PRICE 500
+Price500.distr <- rpar(model2.mixed, "Price500")
+summary(Price500.distr)
+mean(Price500.distr)
+med(Price500.distr)
+plot(Price500.distr)
+
+#2. PRICE 800
+Price800.distr <- rpar(model2.mixed, "Price800")
+summary(Price800.distr)
+mean(Price800.distr)
+med(Price800.distr)
+plot(Price800.distr)
+
+#3. PRICE 1500
+Price1500.distr <- rpar(model2.mixed, "Price1500")
+summary(Price1500.distr)
+mean(Price1500.distr)
+med(Price1500.distr)
+plot(Price1500.distr)
+
+#4. PRICE 2500
+Price2500.distr <- rpar(model2.mixed, "Price2500")
+summary(Price2500.distr)
+mean(Price2500.distr)
+med(Price2500.distr)
+plot(Price2500.distr)
+```
+
+###  Correlated Random Coefficients
 
 ```{r,echo=FALSE}
 
@@ -326,6 +363,10 @@ summary(vcov(model2.mixed2, what = "rpar", type = "cor"))
 
 
 ```
+
+
+
+
 
 # 7. Managerial Implications and Conclusions
 

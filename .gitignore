@@ -404,3 +404,24 @@ FodyWeavers.xsd
 .Ruserdata
 .DS_Store
 *.Rproj
+
+# QMD
+*.o
+*.pdb 
+fort.*
+*.out
+*.agr
+*.mod
+*.dat
+*.dmp
+*.xyz
+*.lmp
+*.vmd
+*.tga
+*.ps
+*.eps
+*.png
+*.ltt
+
+# Final report
+final_report_files/

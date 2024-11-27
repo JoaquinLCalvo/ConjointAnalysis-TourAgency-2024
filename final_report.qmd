@@ -8,7 +8,7 @@ authors:
 format:
   pdf:
     latex-engine: xelatex
-fontsize: 11pt
+fontsize: 12pt
 geometry: margin=1in
 ---
 
@@ -23,7 +23,7 @@ options(scipen = 999)
 # document setup
 ```
 
-```{r}
+```{r libraries}
 #| echo: false
 
 # The `echo: false` option disables the printing of code (only output is displayed).
@@ -31,7 +31,6 @@ options(scipen = 999)
 # Load the packages
 library(tidyverse)
 library(mlogit)
-library(DataExplorer)
 library(ggplot2)
 library(skimr)
 library(dplyr)
@@ -39,7 +38,7 @@ library(MASS)
 
 ```
 
-```{r}
+```{r data}
 #| echo: false
 
 # Load the data
@@ -47,80 +46,13 @@ vacation <- read.csv("./CBC_Vacation_data.csv", header = TRUE, sep = ";")
 
 ```
 
-```{r}
-#### 1- Exploratory Data Analysis EDA ####
-
-# Check the data
-head(vacation)
-summary(vacation)
-skim(vacation)
-
-# Check for missing values
-sum(is.na(vacation))
-
-# Visualize Distributions of Numerical Variables
-vacation %>%
-  select_if(is.numeric) %>%
-  gather() %>%
-  ggplot(aes(value)) +
-  geom_histogram(bins = 30, fill = "skyblue", color = "black") +
-  facet_wrap(~key, scales = "free") +
-  theme_minimal()
-# The variables are not numeric, no point in this plot
-
-# Number of respondents = 250
-length(unique(vacation$resp.id))
-
-# Number of questions per respondent = 18
-table(vacation$resp.id) / 4
-
-# Distribution of the response variable
-table(vacation$alt[vacation$choice == 1]) # A bit left-sweked, right? 
-#it's balanced between the 4 options more or less (so no weird behavior)
-
-# Check the frequencies of attributes
-sapply(vacation[, 4:8], table) #it's balanced
-
-# Check the levels of the attributes
-sapply(vacation[, 4:8], unique)
-# 432 unique combinations of attributes
-
-# Covert to factor
-vacation$Price <- as.factor(vacation$Price)
-vacation$Duration <- as.factor(vacation$Duration)
-vacation$Accommodation <- factor(vacation$Accommodation,
-                                 levels = c("budget", "3stars", "5stars"))
-vacation$Transport <- as.factor(vacation$Transport)
-vacation$Destination <- as.factor(vacation$Destination)
-
-# Visualize Distributions of Categorical Variables
-vacation %>%
-  select_if(is.factor) %>%
-  gather() %>%
-  ggplot(aes(value)) +
-  geom_bar(fill = "skyblue", color = "black") +
-  facet_wrap(~key, scales = "free") +
-  geom_text(stat = "count", aes(label = ..count..), vjust = 1.5, color = "white", size = 4) +
-  xlab("") +
-  ylab("Count") +
-  theme_minimal()
-
-
-# Create the design matrix
-vacation_mlogit <- dfidx(vacation, idx = list(c("ques", "resp.id"), "alt"))
-vacation_mlogit
-
-
-
-```
-
 ## 1. Introduction
 
 Understanding consumer preferences is crucial for designing products and services that resonate with target audiences. Conjoint analysis is a widely used method for modeling decision-making processes, enabling researchers to quantify the importance of different product attributes and the trade-offs consumers are willing to make. By presenting respondents with hypothetical scenarios, this approach allows for a detailed exploration of how specific features influence choices.
 
-This project focuses on vacation planning, a domain where consumer decisions are influenced by a range of factors, including price, duration, accommodation, transport, and destination. The goal of the analysis is to identify the key drivers of consumer preferences for vacation packages and to provide actionable insights for the travel and tourism industry. These insights can help businesses design offerings that better meet the needs and expectations of potential customers.
+This study focuses on vacation planning, a domain where consumer decisions are influenced by a range of factors, including price, duration, accommodation, transport, and destination. The goal of the analysis is to identify the key drivers of consumer preferences for vacation packages and to provide actionable insights for the travel and tourism industry. These findings can help businesses design offerings that better meet the needs and expectations of potential customers.
 
-## 2. Data Collection and Methodology
+## 2. Data Description and Methodology
 
 The dataset for this study was provided by the course professor and is specifically designed to simulate consumer decision-making in vacation planning. It is organized in a long format, a standard structure for Choice-Based Conjoint (CBC) analysis, where:
 
@@ -132,7 +64,7 @@ The dataset for this study was provided by the course professor and is specifica
 
 -   **Attributes and Levels**:
 
-    -   **Price**: Cost of the package (`$500`, `$800`, `$1500`, `$2500`).
+    -   **Price**: Cost of the package (`€500`, `€800`, `€1500`, `€2500`).
 
     -   **Duration**: Vacation length (e.g., `2 days`, `5 days`, `10 days`).
 
@@ -142,192 +74,234 @@ The dataset for this study was provided by the course professor and is specifica
 
     -   **Destination**: Vacation destination (`Greece`, `Turkey`,`Portugal`, `Spain`).
 
--   **Choice Indicator (`choice`)**: A binary variable showing whether an alternative was selected (`1`) or not (`0`).
+-   **Choice Indicator (`choice`)**: A binary variable indicating whether a given alternative within a choice task was selected by the respondent (`1`) or not (`0`). This variable is the dependent variable in the CBC analysis.
 
-Each respondent faced multiple choice tasks, with each task consisting of several vacation package alternatives. Respondents selected their preferred package in each task, and only one alternative per task is marked as chosen. This structure is well-suited for CBC analysis, which directly models such decision-making processes.
+Each respondent faced multiple choice tasks, with each task consisting of four vacation package alternatives. In each task, only one alternative is marked as selected (1), and the others are marked as unselected (0). This structure is ideal for CBC analysis, which models decision-making processes by analyzing the choices made across different tasks.
 
-```{r,echo=FALSE}
+To illustrate the structure of the dataset, let us examine the first few observations (see Table 1). In the first four rows, respondent 1 selects the third alternative (price $500, duration 5 days, accommodation 5 stars, transport by bus, and destination Turkey) in question 1, as indicated by a `choice` value of 1. The other alternatives are not chosen, as reflected by a `choice` value of 0.
+
+```{r table, tab.cap="Sample of the Dataset", out.width="100%", fig.align="center"}
+#| echo: false
 # Load required packages
 library(knitr)
 library(kableExtra)
 
 # Display the first six entries in an aesthetic table
-kable(head(vacation, 10)) %>%
+kable(head(vacation, 8)) %>%
   kable_styling(latex_options = c("striped", "scale_down"))
 ```
 
-### Maybe add an analysis like on slide 8\~10
+## 3. Data Exploration
 
-## 4. Data Description (Borto)
+The dataset contains `r length(unique(vacation$resp.id))` respondents who completed `r length(unique(vacation[vacation$resp.id == 1, "ques"]))` choice tasks each, resulting in `r length(vacation[vacation$resp.id == 1, "ques"])` observations per respondent and a total of `r nrow(vacation)` observations.
 
--   Summary statistics of the data (optional if meaningful).
+Before proceeding with the analysis, we will conduct an exploratory data analysis to gain insights into the distribution of variables, identify potential issues, and prepare the data for modeling.
 
-## 5. - Model Fitting (Ricardo)
+Upon reviewing the summary statistics, it is observed that there are no missing values in the dataset (see Table 2). However, some variables have incorrect data types, which are corrected to ensure proper analysis. Specifically, the `Price`, `Duration`, `Accommodation`, `Transport`, and `Destination` variables were converted into factors. This transformation ensures that each categorical attribute is correctly handled in the Choice-Based Conjoint (CBC) analysis.
 
-This study aims to examine the relationship between consumer choice and product attributes, focusing on understanding why a consumer selects a particular package based on the characteristics of the options presented. To achieve this, we employ a discrete choice model, specifically a multinomial logit regression.
+```{r data exploration}
+#| echo: false
+#### 1- Exploratory Data Analysis EDA ####
 
-We begin by assessing the dataset, which captures respondents' choices among four available alternatives. The dependent variable, *choice*, is a categorical variable with four levels. To appropriately model this type of data, we utilize a Multinomial Logit Model (MNL).
+# Check the data
+#head(vacation)
+#summary(vacation)
+skim(vacation)
 
-On an initial light analysis, the summary for our first model `model1` has intuitive responses. As the price increases, the estimate for the attribute `Price` gains a more negative value. A deeper analysis is performed in the Results and Interpretations section.
+# Check for missing values
+#sum(is.na(vacation))
 
-The alternative-specific constants represent preferences for the positions of the alternatives within each question. Specifically, the parameters `(Intercept):2`, `(Intercept):3`, and `(Intercept):4` quantify the preference for each position from left to right relative to the first position on the left.
+# Number of rows
+#nrow(vacation)
 
-The estimated MNL model indicates that these intercepts are very small and not statistically significant. To improve model parsimony and precision, we have chosen to exclude these intercepts from the analysis, thereby reducing the degrees of freedom.
+# Number of respondents = 250
+#length(unique(vacation$resp.id))
 
-```{r,echo=FALSE}
+# Number of questions per respondent = 18
+#length(unique(vacation[vacation$resp.id == 1, "ques"]))
+```
+
+The distribution of the response variable indicates that the choices are relatively balanced across the four alternatives, suggesting no significant bias in the data. This balance is essential for accurate estimation of preference parameters. Additionally, the frequencies of attributes show a relatively even distribution, indicating that the levels of each attribute are well-represented in the dataset.
+
+```{r response variable distribution, fig.height = 3, fig.cap="Distribution of choice between the alternatives"}
+#| echo: false
+# Distribution of the response variable
+# Create the bar plot
+# Create the bar plot and save bar midpoints
+counts <- table(vacation$alt[vacation$choice == 1])
+barplot_obj <- barplot(counts, col = "skyblue", xlab = "", ylab = "Frequency")
+
+# Add values on top of the bars
+text(x = barplot_obj, y = counts, labels = as.character(counts), pos = 1, cex = 0.8, col = "white")
+```
+
+```{r attribute frequencies}
+#| echo: false
+#it's balanced between the 4 options more or less (so no weird behavior)
+
+# Check the frequencies of attributes
+#sapply(vacation[, 4:8], table) #it's balanced
+```
+
+
+```{r to factor}
+#| echo: false
+# Covert to factor
+vacation$Price <- as.factor(vacation$Price)
+vacation$Duration <- as.factor(vacation$Duration)
+vacation$Accommodation <- factor(vacation$Accommodation,
+                                 levels = c("budget", "3stars", "5stars"))
+vacation$Transport <- as.factor(vacation$Transport)
+vacation$Destination <- as.factor(vacation$Destination)
+```
+
+```{r categorical variables distribution, fig.cap="Distributions of attributes", fig.width=8}
+#| echo: false
+# Visualize Distributions of Categorical Variables
+vacation %>%
+  select_if(is.factor) %>%
+  gather() %>%
+  ggplot(aes(value)) +
+  geom_bar(fill = "skyblue", color = "black") +
+  facet_wrap(~key, scales = "free") +
+  geom_text(stat = "count", aes(label = ..count..), vjust = 1.5, color = "white", size = 3) +
+  xlab("") +
+  ylab("Frequency") +
+  theme_minimal()
+
+```
+
+```{r design matrix}
+#| echo: false
+# Create the design matrix
+vacation_mlogit <- dfidx(vacation, idx = list(c("ques", "resp.id"), "alt"))
+```
+
+
+## 4. Fitting Models with Fixed Effects
+
+This study aims to examine the relationship between consumer choices and product attributes, with a focus on understanding which vacation packages are the most appealing to customers. To achieve this, we employ a discrete choice modeling approach, specifically a Multinomial Logit (MNL) regression.
+
+Let us first fit a baseline Multinomial Logit (MNL) model to the data with the following specification:
+- Dependent Variable: `choice`
+- Independent Variables: `Price`, `Duration`, `Accommodation`, `Transport`, and `Destination`
+- Model Characteristics: This model includes **intercepts** and only accounts for **fixed effects**, assuming homogeneous preferences across respondents without considering random variation in preferences or unobserved heterogeneity.
+
+```{r model1}
+#| echo: false
+# Fit the model with intercept parameters
 model1 <- mlogit(choice ~ Price + Duration + Accommodation +
                    Transport + Destination,
                  data = vacation_mlogit)
-summary(model1)
+round(summary(model1)$CoefTable, 3)
 ```
 
-We formally evaluate the decision to remove the intercepts using a likelihood ratio test. This involves comparing the larger model `model1`, which includes the intercepts, with the smaller model `model2` that excludes them.
+The alternative-specific constants represent preferences for the positions of the alternatives within each question. Specifically, the parameters `(Intercept):2`, `(Intercept):3`, and `(Intercept):4` quantify the preference for each position from left to right relative to the first position on the left. The estimated MNL model indicates that these intercepts are very small and not statistically significant. To improve model parsimony and precision, we have chosen to exclude these intercepts from the analysis, thereby reducing the degrees of freedom.
 
-The comparison between the full model and the reduced model without intercepts yields a p-value of `0.7185` . Given this high p-value, we conclude that there is no significant difference in goodness of fit between the two models, indicating that both explain the data equally well. Consequently, the alternative-specific constants are not essential for adequately modeling the data.
+We formally evaluate the decision to remove the intercepts using a likelihood ratio test. This involves comparing the larger model `model1`, which includes the intercepts, with the smaller model `model2` that excludes them. The comparison between the full model and the reduced model without intercepts yields a p-value of `0.7185` . Given this high p-value, we conclude that there is no significant difference in goodness of fit between the two models, indicating that both explain the data equally well. Consequently, the alternative-specific constants are not essential for adequately modeling the data.
 
-```{r,echo=FALSE}
+```{r model2}
+#| echo: false
 # Fit the model without intercept parameters
 model2 <- mlogit(choice ~ Price + Duration + Accommodation +
                    Transport + Destination | -1,
                  data = vacation_mlogit)
-summary(model2)
-
 # Likelihood ratio test
 lrtest(model2, model1)
 ```
 
-We continue to explore opportunities to simplify the model. In the previous analysis, the attribute *price* was treated as a qualitative variable. We now incorporate it as a quantitative predictor in order to understand if the the model's efficiency and interpretability is enhanced.
+We continue to explore opportunities to simplify the model. In the previous analysis, the attribute `price` was treated as a qualitative variable. We now incorporate it as a quantitative predictor in order to understand if the the model's predictive power remains consistent. 
 
-```{r,echo=FALSE}
+```{r model3}
+#| echo: false
 # Fit the model without intercept and price as a quantitative variable
 model3 <- mlogit(choice ~ as.numeric(as.character(Price)) +
                    Duration + Accommodation + Transport + Destination | -1,
                  data = vacation_mlogit)
-summary(model3)
 lrtest(model3, model2)
 ```
 
-Again, we formally evaluate the decision to transform the attribute from quantitative, to quantitative, using a likelihood ratio test. The null hypothesis for the likelihood ratio test for the comparison between `model2` and `model3` asserts that the simpler model (Model 2) is sufficient, and that the added complexity of Model 3 does not result in a significant improvement in model fit. Given the extremely low p-value, we reject the null hypothesis and select Model 2 over Model 3.
+Again, we formally evaluate the decision to transform the attribute from quantitative, to quantitative, using a likelihood ratio test. Given the extremely low p-value, we reject the null hypothesis and select `model2` over `model3`. This indicates that the model with price as a qualitative variable is superior in terms of goodness of fit.
 
-## 6. Results and Interpretations (Ricardo)
+### Interpretation of the Selected Model
 
--   Discussion of the results:
-    -   Key insights into consumer preferences.
-    -   Relationships between attributes and consumer choices.
+The selected model (`model2`) provides valuable insights into consumer preferences for vacation packages. We observe a clear price sensitivity, as the prices increase, the likelihood of selection decreases. Regarding the duration of the offered options, the most favored option is a short 2 night trip, followed by a longer 10 night trip. The intermediate 5 day trip is the least preferred. Accommodation preferences show a strong inclination towards 5-star hotels, followed by 3-star. Low cost options are ranked lowest. For transportation options, planes are most preferred, followed by bus and trains being the least desirable. Regarding the destination, the most preferred country is Portugal, followed by Spain and then Turkey. Greece is the least desirable destination.
 
-### Interpretation of the selected model (model2).
-
-The selected model reveals preferences among the respondents. We observe a clear price sensitivity, as the prices increase, the likelihood of selection decreases. Regarding the duration of the offered options, the most favored option is a short 2 night trip, followed by a longer 10 night trip. The intermediate 5 day trip is the least preferred. Accommodation preferences show a strong inclination towards 5-star hotels, followed by 3-star. Low cost options are ranked lowest. For transportation options, planes are most preferred, followed by bus and trains being the least desirable. Regarding the destination, the most preferred country is Portugal, followed by Spain and then Turkey. Greece is the least desirable destination.
+```{r model2 coefficients}
+#| echo: false
+round(summary(model2)$CoefTable, 5)
+```
 
 ### Willingness to Pay
 
-We can further our interpretation of the model by calculating the willingness to pay for each level's attribute utilizing the 3rd proposed model that treats price as a quantitative attribute. The results represent the monetary value that respondents are willing to pay for changes in each attribute.
+We can further improve our interpretation of the model by calculating the willingness to pay for each level's attribute utilizing the 3rd proposed model that treats price as a quantitative attribute. The results represent the monetary value that respondents are willing to pay for changes in each attribute.
 
-```{r,echo=FALSE}
+```{r willingness to pay}
+#| echo: false
 - coef(model3) / coef(model3)["as.numeric(as.character(Price))"]
 ```
 
 Upon analysis of the results, we find strong preferences on the monetary value respondents place on various vacation attributes. For trip duration, respondents are willing to pay up to €1948.53 more for a 2-night vacation instead of a 5-night vacation and €1312.81 more for a 2-night vacation instead of a 10-night vacation, showing a strong preference for shorter trips. Regarding accommodation, customers value high-end options significantly, being willing to pay €555.56 more for a 3-star hotel over a budget hotel and €2219.09 more for a 5-star hotel over a budget option. In terms of transportation, respondents are willing to pay €848.05 more to fly instead of taking a bus, while preferring a bus over a train by €386.12. Finally, regarding destination preferences, a customer is willing to pay €2817.97 more to visit Portugal over Greece, €1947.53 more to visit Spain over Greece, and €790.83 more to visit Turkey over Greece.
 
-In summary, respondents prefer 2-night vacations, 5-star hotels, plane travel, and destinations like Portugal and Spain, showing a clear willingness to pay more for convenience, luxury, and popular locations.
+In summary, on average respondents prefer 2-night vacations, 5-star hotels, plane travel, and destinations like Portugal and Spain, showing a clear willingness to pay more for convenience, luxury, and popular locations.
 
-### (Joaco's Comments)
+## 5. Fitting Models with Random Effects
 
-Given the disparities between the part worths and the WTP tables, it would be fair to assume that we face, on average, a set of respondents with high sensitivity towards cost. That is, on abstract they have certain tastes, but when it comes the time of paying, their choices change a lot.
+In this section, we fit mixed logit models in order to capture individual differences in preferences, addressing limitations of the standard MNL model. By including random coefficients for attributes, the mixed logit accounts for varying preferences across respondents. We later compare the models to the MNL model (`model2`) using a likelihood ratio test to assess improvements in model fit.
 
-**COMMENT: Are we saying here that: The first row refers to the company's planned design, while the other five rows represent the competitors' products? I am a bit confused with the interpretation of this part. I'll continue with the other stuff and come back later.**
+### Uncorrelated Random Coefficients
 
-```{r,echo=FALSE}
+First, let us fit a mixed MNL model without correlation of random coefficients. The results will show the estimated standard deviations for each attribute, which represent the level of heterogeneity in preferences across respondents. 
 
-# Defining the function to predict from the MNL
-predict.mnl <- function(model, data) {
-  data.model <- model.matrix(update(model$formula, 0 ~ .), data = data)[,-1]
-  logitUtility <- data.model%*%model$coef
-  share <- exp(logitUtility)/sum(exp(logitUtility))
-  cbind(share, data)
-}
-
-# Defining the data frame containing the set of possible designs 
-attributes <- list(
-  Price = unique(vacation$Price),
-  Duration = unique(vacation$Duration),
-  Accommodation = unique(vacation$Accommodation),
-  Transport = unique(vacation$Transport),
-  Destination = unique(vacation$Destination)
-)
-allDesign <- expand.grid(attributes) 
-options(max.print = 3000)
-allDesign
-
-# 4 heterogeneous designs for each destination
-new.data <- allDesign[c(3, 24, 59, 95,
-                        115, 146, 200, 205,
-                        231, 256, 279, 298,
-                        331, 366, 401, 431), ] 
-new.data
-
-predict.mnl(model2, new.data)
-# why these vacation packages? how we explain the choice?
-# if 2 packages are too similar than shares are wrong
-
-
-
-```
-
-### Modelling: Mixed MNL model
-
-The model includes random coefficients to account for individual heterogeneity in preferences, and the standard deviations of these random coefficients suggest considerable variation across respondents, particularly for price and duration preferences. The likelihood ratio test indicates that the inclusion of random coefficients improves the model's fit significantly, reinforcing the importance of accounting for individual differences in choice behavior. The analysis of the model reveals several interesting preferences among respondents. First, while the majority of individuals prefer shorter stays, approximately 10% actually favor 10-day stays over 2-day ones. Regarding accommodation, 17% of respondents prefer budget options over 3-star accommodations, yet 100% of respondents prefer 5-star hotels over budget options. In terms of transportation, 12% of respondents prefer traveling by bus over flying, and 65% prefer the bus to the train. When considering destinations, although everyone prefers Portugal and Spain over Greece, 21% of respondents actually prefer Greece to Turkey. Finally, the analysis shows a clear preference for cheaper options, as respondents consistently favor lower-priced choices across the board. These findings highlight the diversity in individual preferences, suggesting that there is significant variability in how different respondents evaluate the same attributes.
-
-```{r,echo=FALSE}
-
+```{r mixed model1}
+#| echo: false
 model2.rpar <- rep("n", length=length(model2$coef))
 names(model2.rpar) <- names(model2$coef)
-model2.rpar
-
 
 model2.mixed <- mlogit(choice ~ Price + Duration + Accommodation +
                          Transport + Destination | -1, 
                    data = vacation_mlogit, 
                    panel=TRUE, rpar = model2.rpar, correlation = FALSE)
-summary(model2.mixed)
-
-# Visual summary of the distribution of random effects and hence of the level of heterogeneity (ERASE THIS COMMENT IN FINAL VERSION)
-par(mfrow = c(3, 4), mar = c(2, 2, 2, 1))  # 3 rows and 4 columns, adjust margins
-plot(model2.mixed)
-#TO DO: Analyze this plot and understand why its results are so different from the professor's
-
-#"Indeed, the estimated standard deviation for the part worth of 8-seats against
-#6-seats of about 0.995 is quite large if compared with the corresponding
-#average estimate (of 0.39 in absolute value). This suggests that while people,
-#on average, prefer 6 to 8 seats, a non-negligible fraction of them prefer 8
-#seats."
-
-
+round(summary(model2.mixed)$CoefTable, 3)
 ```
 
+The model includes random coefficients to account for individual heterogeneity in preferences, and the standard deviations of these random coefficients suggest considerable variation across respondents, particularly for price and duration preferences. The likelihood ratio test indicates that the inclusion of random coefficients improves the model's fit significantly, reinforcing the importance of accounting for individual differences in choice behavior. The analysis of the model reveals several interesting preferences among respondents. First, while the majority of individuals prefer shorter stays, approximately 10% actually favor 10-day stays over 2-day ones. Regarding accommodation, 17% of respondents prefer budget options over 3-star accommodations, yet 100% of respondents prefer 5-star hotels over budget options. In terms of transportation, 12% of respondents prefer traveling by bus over flying, and 65% prefer the bus to the train. When considering destinations, although everyone prefers Portugal and Spain over Greece, 21% of respondents actually prefer Greece to Turkey. Finally, the analysis shows a clear preference for cheaper options, as respondents consistently favor lower-priced choices across the board. These findings highlight the diversity in individual preferences, suggesting that there is significant variability in how different respondents evaluate the same attributes.
+
+```{r compare model2 and mixed model1}
+#| echo: false
+lrtest(model2, model2.mixed)
+```
+Interpret likelihood ratio test results: mixed model is better
 
 ### Correlated Random Coefficients
 
 To get a better sense of the strength of the association among random coefficients we extract a covariance matrix. We can further understand the preferences of the respondents and how they are correlated. First, there is a high correlation between the following pairs of destinations: "Portugal-Spain", "Portugal-Turkey", "Spain-Turkey". This provides insights about new options that can be offered combining these options. Second, the low variability in preferences for low prices indicates a universal preference for cheaper options, all respondents prefer to pay less. All the other features contain high variability, confirmed by the low p-values, suggesting that tailored packages appealing to distinct customers are portential option. Additionally, the positive correlation between "Price1500" and "Price2500" supports the idea of creating a separate offer for luxury trips, Lastly, there is a strong correlation between "Transportplane" and "Transporttrain". This suggest potential for creating a combined transportation package.
 
-```{r,echo=FALSE}
-
+```{r mixed model2}
+#| echo: false
 # Adding correlated random coefficients
 model2.mixed2 <- update(model2.mixed, correlation = TRUE)
-summary(model2.mixed2)
-
+round(summary(model2.mixed2)$CoefTable, 3)
 
 #NOTE: This should be placed in the final analysis part.
-summary(vcov(model2.mixed2, what = "rpar", type = "cor"))
+#summary(vcov(model2.mixed2, what = "rpar", type = "cor"))
 ```
 
 
+```{r compare model2.mixed and model2.mixed2}
+lrtest(model2.mixed, model2.mixed2)
 ```
 
-```{r,echo=FALSE}
+Interpret likelihood ratio test results: mixed model with correlated random coefficients is better
 
+Finally, we try to fit ..... 
 
+TO DECIDE:
 
+Correlation threshold: 0.5 or 0.7  (i tried 0.4, still all correlated is the best model)
+
+```{r get strongly correlated features}
+#| echo: false
 # Correlation Matrix
 corr_mat <- cov2cor(cov.mlogit(model2.mixed2))
 corr_mat
@@ -336,7 +310,7 @@ corr_mat
 # is massive, here is a function that does it for us: (DELETE THIS COMMENT IN FINAL VERSION)
 
 # Function to extract strongly correlated features
-get_strong_correlations <- function(corr_mat, threshold = 0.7) {
+get_strong_correlations <- function(corr_mat, threshold = 0.5) {
   # Find indices of correlations above threshold or below -threshold
   high_corr_indices <- which(abs(corr_mat) > threshold, arr.ind = TRUE)
   
@@ -351,30 +325,35 @@ get_strong_correlations <- function(corr_mat, threshold = 0.7) {
 }
 
 strongly_correlated_features <- get_strong_correlations(corr_mat)
-print(strongly_correlated_features)
 
 model2.mixed3 <- update(model2.mixed2, correlation = strongly_correlated_features)
 
-#Below, the model with the check mark emoji is the winner
-lrtest(model2, model2.mixed) #Fixed effects vs. uncorrelated random effects ✅
-lrtest(model2.mixed, model2.mixed2) #Uncorrelated random effects vs. all correlated random effects ✅
-lrtest(model2.mixed3, model2.mixed2) #partially correlated random effects vs. all correlated random effects ✅
+lrtest(model2.mixed3, model2.mixed2) 
 
 # Winner: all correlated random effects MNL (model2.mixed2)
+```
+
+All correlated random effects MNL (model2.mixed2) is the best model......
 
 
+TO DECIDE:
+
+Why plots are different, which one to use
+
+```{r plot mixed model2}
+#| echo: false
+# 12 plot par
+par(mfrow = c(3, 4), mar = c(2, 2, 2, 1),  cex.main=0.9)
+plot(model2.mixed)
+plot(model2.mixed2)
 ```
 
 ### Preference Shares
 
 To further assess this,another useful approach to assess the role of product attributes consists on using the model to obtain preference share predictions. By changing the levels’ attributes of the planned design we can observe how variations in the design influence the preference shares.
 
-```{r,echo=FALSE}
-################################
-### SIMULATING PREFERENCE SHARES
-################################
-
-
+```{r preference shares}
+#| echo: false
 predict.mixed.mnl <- function(model, data, nresp=1000) {
   data.model <- model.matrix(update(model$formula, 0 ~ .), data = data)[,-1]
   coef.Sigma <- cov.mlogit(model)
@@ -386,56 +365,71 @@ predict.mixed.mnl <- function(model, data, nresp=1000) {
     share = exp(utility)/sum(exp(utility))
     shares[i,] <- share
   }
-  cbind(colMeans(shares), data)
+  cbind(colMeans(shares), data) %>% 
+    arrange(desc(colMeans(shares)))
+  
 }
 
+# Defining the data frame containing the set of possible designs 
+attributes <- list(
+  Price = unique(vacation$Price),
+  Duration = unique(vacation$Duration),
+  Accommodation = unique(vacation$Accommodation),
+  Transport = unique(vacation$Transport),
+  Destination = unique(vacation$Destination)
+)
+allDesign <- expand.grid(attributes) 
+
+# MAKE Price 800, Duration 2, Accommodation 5 stars, Transport plane, Destination Portugal as reference package
+allDesign[allDesign$Price == "800" & allDesign$Duration == "2" & allDesign$Accommodation == "5stars" & allDesign$Transport == "plane" & allDesign$Destination == "Portugal", ] # 383
+
+new.data <- allDesign[c(383, 24, 59, 95,
+                        115, 146, 200, 205,
+                        231, 256, 279, 298,
+                        331, 366, 401, 431), ]  
+
+# CHANGE new.data to have different packages
+
 set.seed(47)
-predict.mixed.mnl(model2.mixed2, data=new.data)
-
-
-
+predict.mixed.mnl(model2.mixed2, data=new.data) 
 
 ```
 
 ### Sensitivity Charts
 
-```{r,echo=FALSE}
-
-
-###################
-# Sensitivity Chart
-###################
+```{r sensitivity chart}
+#| echo: false
 
 # TO-DO: The current sensitivity chart uses model2. Model2.mixed2 is the best fit, but 
 # I couldn't make it work with the mixed effects MNL. If someone were to be able would be great.
 
-sensitivity.mnl <- function(model, attrib, base.data, competitor.data) {
-  data <- rbind(base.data, competitor.data)
-  base.share <- predict.mnl(model, data)[1,1]
-  share <- NULL
-  for (a in seq_along(attrib)) {
-    for (i in attrib[[a]]) {
-      data[1,] <- base.data
-      data[1,a] <- i
-      share <- c(share, predict.mnl(model, data)[1,1])
-    }
-  }
-  data.frame(level=unlist(attrib), share=share, increase=share-base.share)
-}
-base.data <- new.data[1,]
-competitor.data <- new.data[-1,]
-tradeoff <- sensitivity.mnl(model2, attributes, base.data, competitor.data)
-
-# Define labels with both attribute names and values for clarity
-tradeoff$labels <- paste0(rep(names(attributes), sapply(attributes, length)),
-                          "\n", tradeoff$level)
-
-# Plot with enhanced readability 
-# (perhaps we shouldcrop the variable names towards the final version to improve the visualization)
-barplot(tradeoff$increase, horiz=FALSE, names.arg=tradeoff$labels, las=2, 
-        ylab="Change in Share for the Planned Product Design", 
-        ylim=c(-0.1, 0.11), cex.names=0.7)
-grid(nx=NA, ny=NULL)
+# sensitivity.mnl <- function(model, attrib, base.data, competitor.data) {
+#   data <- rbind(base.data, competitor.data)
+#   base.share <- predict.mnl(model, data)[1,1]
+#   share <- NULL
+#   for (a in seq_along(attrib)) {
+#     for (i in attrib[[a]]) {
+#       data[1,] <- base.data
+#       data[1,a] <- i
+#       share <- c(share, predict.mnl(model, data)[1,1])
+#     }
+#   }
+#   data.frame(level=unlist(attrib), share=share, increase=share-base.share)
+# }
+# base.data <- new.data[1,]
+# competitor.data <- new.data[-1,]
+# tradeoff <- sensitivity.mnl(model2, attributes, base.data, competitor.data)
+# 
+# # Define labels with both attribute names and values for clarity
+# tradeoff$labels <- paste0(rep(names(attributes), sapply(attributes, length)),
+#                           "\n", tradeoff$level)
+# 
+# # Plot with enhanced readability 
+# # (perhaps we shouldcrop the variable names towards the final version to improve the visualization)
+# barplot(tradeoff$increase, horiz=FALSE, names.arg=tradeoff$labels, las=2, 
+#         ylab="Change in Share for the Planned Product Design", 
+#         ylim=c(-0.1, 0.11), cex.names=0.7)
+# grid(nx=NA, ny=NULL)
 
 # INTERPRETATION
 #The main insights that we can derive from the Sensitivity Chart are about the 
@@ -449,7 +443,9 @@ grid(nx=NA, ny=NULL)
 ```
 
 
+# 6. Results
 
+-   Summary of the main findings.
 
 
 # 7. Managerial Implications and Conclusions

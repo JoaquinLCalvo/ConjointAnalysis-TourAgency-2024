@@ -14,7 +14,7 @@ library(MASS)
 
 # Load the data
 vacation <- read.csv("./CBC_Vacation_data.csv", header = TRUE, sep = ";")
-View(vacation)
+# View(vacation)
 
 #### 1- EDA ####
 
@@ -179,14 +179,16 @@ predict.mnl <- function(model, data) {
   cbind(share, data)
 }
 
-# Defining the data frame containing the set of possible designs 
-attributes <- list(
-  Price = unique(vacation$Price),
-  Duration = unique(vacation$Duration),
-  Accommodation = unique(vacation$Accommodation),
-  Transport = unique(vacation$Transport),
-  Destination = unique(vacation$Destination)
-)
+
+
+
+#Defining the data frame containing the set of possible designs 
+attributes <- list(Price=names(table(vacation_mlogit$Price)),
+                   Duration=names(table(vacation_mlogit$Duration)),
+                   Accommodation=names(table(vacation_mlogit$Accommodation)),
+                   Transport=names(table(vacation_mlogit$Transport)),
+                   Destination=names(table(vacation_mlogit$Destination)))
+                   
 allDesign <- expand.grid(attributes) 
 options(max.print = 3000)
 allDesign
@@ -374,7 +376,7 @@ sensitivity.mnl <- function(model, attrib, base.data, competitor.data) {
 }
 base.data <- new.data[1,]
 competitor.data <- new.data[-1,]
-tradeoff <- sensitivity.mnl(model2, attributes, base.data, competitor.data)
+(tradeoff <- sensitivity.mnl(model2, attributes, base.data, competitor.data))
 
 # Define labels with both attribute names and values for clarity
 tradeoff$labels <- paste0(rep(names(attributes), sapply(attributes, length)),
@@ -387,7 +389,41 @@ barplot(tradeoff$increase, horiz=FALSE, names.arg=tradeoff$labels, las=2,
         ylim=c(-0.1, 0.11), cex.names=0.7)
 grid(nx=NA, ny=NULL)
 
-# INTERPRETATION
+#---------------------------------------
+
+#model2.mixed sensitivity
+sensitivity.mnl <- function(model, attrib, base.data, competitor.data) {
+  data <- rbind(base.data, competitor.data)
+  base.share <- predict.mixed.mnl(model, data)[1,1]
+  share <- NULL
+  for (a in seq_along(attrib)) {
+    for (i in attrib[[a]]) {
+      data[1,] <- base.data
+      data[1,a] <- i
+      share <- c(share, predict.mixed.mnl(model, data)[1,1])
+    }
+  }
+  data.frame(level=unlist(attrib), share=share, increase=share-base.share)
+}
+base.data <- new.data[1,]
+competitor.data <- new.data[-1,]
+tradeoff1 <- sensitivity.mnl(model2.mixed2, attributes, base.data, competitor.data)
+
+# Define labels with both attribute names and values for clarity
+tradeoff1$labels <- paste0(rep(names(attributes), sapply(attributes, length)),
+                          "\n", tradeoff$level)
+
+# Plot with enhanced readability 
+# (perhaps we shouldcrop the variable names towards the final version to improve the visualization)
+barplot(tradeoff1$increase, horiz=FALSE, names.arg=tradeoff$labels, las=2, 
+        ylab="Change in Share for the Planned Product Design", 
+        ylim=c(-0.1, 0.11), cex.names=0.7)
+grid(nx=NA, ny=NULL)
+
+
+#------------------------------------------
+
+INTERPRETATION
 #The main insights that we can derive from the Sensitivity Chart are about the 
 #Destination. Having Portugal as a Destination would increase the Preference Share
 #by around 4%, followed by Spain with an increase of around 2% in the PS. While 

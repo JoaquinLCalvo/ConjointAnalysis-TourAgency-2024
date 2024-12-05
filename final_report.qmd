@@ -263,7 +263,7 @@ model2.mixed <- mlogit(choice ~ Price + Duration + Accommodation +
                          Transport + Destination | -1, 
                    data = vacation_mlogit, 
                    panel=TRUE, rpar = model2.rpar, correlation = FALSE)
-round(summary(model2.mixed)$CoefTable, 3)
+round(summary(model2.mixed)$CoefTable, 5)
 ```
 
 We notice that almost all the standard deviation coefficients are statistically significant with low p-values. The biggest variability is observed for transportation by train, longer stays, 5-star accommodation and Turkey as a destination. This indicates that respondents might have diverse preferences for these attributes, with some individuals valuing them more than others.
@@ -290,6 +290,7 @@ model2.mixed2 <- update(model2.mixed, correlation = TRUE)
 
 
 ```{r compare model2.mixed and model2.mixed2}
+#| echo: false
 lrtest(model2.mixed, model2.mixed2)
 ```
 
@@ -305,7 +306,6 @@ Finally, we try fitting a model with only the strongly correlated features (corr
 # Correlation threshold: 0.7 (so that they are actually strong)
 # Correlation Matrix
 corr_mat <- cov2cor(cov.mlogit(model2.mixed2))
-corr_mat
 
 #The professor manually picked the strongly correlated features, but since our matrix 
 # is massive, here is a function that does it for us: (DELETE THIS COMMENT IN FINAL VERSION)
@@ -345,7 +345,7 @@ round(summary(model2.mixed3)$CoefTable, 5)[17:52, ]
 
 First, there is a high correlation between the following pairs of destinations: `Portugal-Spain`, `Portugal-Turkey`, `Spain-Turkey`. This provides insights about new offers that can be tailored combining these options. Second, the low variability in preferences for low prices indicates a universal preference for cheaper options, all respondents prefer to pay less. All the other features contain high variability, confirmed by the low p-values, suggesting that tailored packages appealing to distinct customers are potential option. Additionally, the positive correlation between `Price1500` and `Price2500` supports the idea of creating a separate offer for luxurious trips. Lastly, there is a strong correlation between `Transportplane` and `Transporttrain`. This suggest potential for creating a combined transportation package.
 
-The analysis of the model reveals several interesting preferences among respondents. First, while the majority of individuals prefer shorter stays, approximately 10% actually favor 10-day stays over 2-day ones. Regarding accommodation, 17% of respondents prefer budget options over 3-star accommodations, yet 100% of respondents prefer 5-star hotels over budget options. In terms of transportation, 12% of respondents prefer traveling by bus over flying, and 65% prefer the bus to the train. When considering destinations, although everyone prefers Portugal and Spain over Greece, 21% of respondents actually prefer Greece to Turkey. Finally, the analysis shows a clear preference for cheaper options, as respondents consistently favor lower-priced choices across the board. These findings highlight the diversity in individual preferences, suggesting that there is significant variability in how different respondents evaluate the same attributes.
+The analysis of the model reveals several interesting preferences among respondents. First, while the majority of individuals prefer shorter stays, approximately 9% actually favor 10-day stays over 2-day ones. Regarding accommodation, 8% of respondents prefer budget options over 3-star accommodations, yet 96% of respondents prefer 5-star hotels over budget options. In terms of transportation, 22% of respondents prefer traveling by bus over flying, and 67% prefer the bus to the train. When considering destinations, although almost everyone prefers Portugal and Spain over Greece, 27% of respondents actually prefer Greece to Turkey. Finally, the analysis shows a clear preference for cheaper options, as respondents consistently favor lower-priced choices across the board. These findings highlight the diversity in individual preferences, suggesting that there is significant variability in how different respondents evaluate the same attributes.
 
 ```{r plot mixed model2}
 #| echo: false
@@ -354,6 +354,8 @@ par(mfrow = c(3, 4), mar = c(2, 2, 2, 1),  cex.main=0.9)
 #plot(model2.mixed) # This model is suboptimal, therefore we should use the other one
 plot(model2.mixed2)
 ```
+
+## 6. Preference Shares and Sensitivity Charts
 
 ### Preference Shares
 
@@ -450,7 +452,7 @@ predict.mixed.mnl(model2.mixed2, data=new.data)
 ```
 
 
-# 6. Results
+## 7. Results
 
 When we analyze the estimated average values over all respondents, we come to the following conclusions:
 
@@ -476,7 +478,7 @@ Then, when the Mixed Effects model was fitted, we checked a magnitude of variati
 - **Highly correlated destinations**: Not only Portugal and Spain are highly correlated choices, also visiting these destinations is highly correlated with a desire to visit Turkey. This point should be used for follow-up offers for those who already travelled with the company.
 
 
-# 7. Managerial Implications and Conclusions
+## 8. Managerial Implications and Conclusions
 
 
 The main products of the company should be:
@@ -527,6 +529,6 @@ Key insights included a strong sensitivity to price, a preference for short trip
 -   Recommendations for stakeholders (e.g., product development, marketing strategies). Final conclusions summarizing the study.
 -   Final conclusions summarizing the study.
 
-# 8. References
+## 9. References
 
 -   Cite all references, including academic, literature, data sources, and tools used.

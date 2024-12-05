@@ -345,15 +345,14 @@ round(summary(model2.mixed3)$CoefTable, 5)[17:52, ]
 
 First, there is a high correlation between the following pairs of destinations: `Portugal-Spain`, `Portugal-Turkey`, `Spain-Turkey`. This provides insights about new offers that can be tailored combining these options. Second, the low variability in preferences for low prices indicates a universal preference for cheaper options, all respondents prefer to pay less. All the other features contain high variability, confirmed by the low p-values, suggesting that tailored packages appealing to distinct customers are potential option. Additionally, the positive correlation between `Price1500` and `Price2500` supports the idea of creating a separate offer for luxurious trips. Lastly, there is a strong correlation between `Transportplane` and `Transporttrain`. This suggest potential for creating a combined transportation package.
 
-The analysis of the model reveals several interesting preferences among respondents. First, while the majority of individuals prefer shorter stays, approximately 9% actually favor 10-day stays over 2-day ones. Regarding accommodation, 8% of respondents prefer budget options over 3-star accommodations, yet 96% of respondents prefer 5-star hotels over budget options. In terms of transportation, 22% of respondents prefer traveling by bus over flying, and 67% prefer the bus to the train. When considering destinations, although almost everyone prefers Portugal and Spain over Greece, 27% of respondents actually prefer Greece to Turkey. Finally, the analysis shows a clear preference for cheaper options, as respondents consistently favor lower-priced choices across the board. These findings highlight the diversity in individual preferences, suggesting that there is significant variability in how different respondents evaluate the same attributes.
-
-```{r plot mixed model2}
+```{r plot mixed model2, fig.cap="Distributions of Random Coefficients in the Best Mixed MNL Model"}
 #| echo: false
 # 12 plot par
-par(mfrow = c(3, 4), mar = c(2, 2, 2, 1),  cex.main=0.9)
+par(mfrow = c(4, 3), mar = c(2, 2, 2, 1),  cex.main=0.9)
 #plot(model2.mixed) # This model is suboptimal, therefore we should use the other one
 plot(model2.mixed2)
 ```
+The analysis of the model reveals several interesting preferences among respondents (see Figure 3-4). First, while the majority of individuals prefer shorter stays, approximately 9% actually favor 10-day stays over 2-day ones. Regarding accommodation, 8% of respondents prefer budget options over 3-star accommodations, yet 96% of respondents prefer 5-star hotels over budget options. In terms of transportation, 22% of respondents prefer traveling by bus over flying, and 67% prefer the bus to the train. When considering destinations, although almost everyone prefers Portugal and Spain over Greece, 27% of respondents actually prefer Greece to Turkey. Finally, the analysis shows a clear preference for cheaper options, as respondents consistently favor lower-priced choices across the board. These findings highlight the diversity in individual preferences, suggesting that there is significant variability in how different respondents evaluate the same attributes. 
 
 ## 6. Preference Shares and Sensitivity Charts
 

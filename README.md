@@ -15,8 +15,10 @@ The study is based on a synthetic dataset simulating vacation package choices. W
 - Find the final report at `outputs/reports/final_report.qmd`.
 
 
-## Authors (alphabetically)
+## Authors 
+(alphabetically)
+
 - Andrea Bortoluzzi
 - Ricardo Esquivel D'Avanzo
-- Maria Starodubtseva
 - Joaquin Lopez Calvo
+- Maria Starodubtseva

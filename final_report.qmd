@@ -1,10 +1,11 @@
 ---
 title: "Understanding Consumer Preferences for Vacation Packages: A Choice-Based Conjoint Analysis"
 authors:
-  - "Maria Starodubtseva (mariia.starodubtseva@studenti.unitn.it)"
-  - "Ricardo Esquivel D'Avanzo (r.esquiveldavanzo@studenti.unitn.it)"
-  - "Andrea Bortoluzzi (andrea.bortoluzzi-1@studenti.unitn.it)"
-  - "Joaquin Lopez Calvo (joaquin.lopezcalvo@studenti.unitn.it)"
+    - "Andrea Bortoluzzi (andrea.bortoluzzi-1@studenti.unitn.it)"
+    - "Ricardo Esquivel D'Avanzo (r.esquiveldavanzo@studenti.unitn.it)"
+    - "Joaquin Lopez Calvo (joaquin.lopezcalvo@studenti.unitn.it)"
+    - "Maria Starodubtseva (mariia.starodubtseva@studenti.unitn.it)"
+
 format:
   pdf:
     latex-engine: xelatex
@@ -178,7 +179,7 @@ vacation_mlogit <- dfidx(vacation, idx = list(c("ques", "resp.id"), "alt"))
 
 ## 4. Fitting Models with Fixed Effects
 
-This study aims to examine the relationship between consumer choices and product attributes, with a focus on understanding which vacation packages are the most appealing to customers. To achieve this goal, we employed a discrete choice modeling approach, specifically a Multinomial Logit (MNL) regression.
+Our modeling starts from discrete choice modeling approach, specifically a Multinomial Logit (MNL) regression. This method will help us to examine the relationship between consumer choices and product attributes. This first model assumes homogeneous preferences across respondents by estimating average effects for each attribute level.
 
 Let us first fit a baseline MNL model to the data with the following specification:
 
@@ -340,7 +341,7 @@ The likelihood ratio test indicates that the model with all correlated random ef
 round(summary(model2.mixed3)$CoefTable, 5)[17:52, ]
 ```
 
-First, there is a high correlation between the following pairs of destinations: `Portugal-Spain`, `Portugal-Turkey`, `Spain-Turkey`. This provides insights about new offers that can be tailored combining these options. Second, the low variability in preferences for low prices indicates a universal preference for cheaper options, all respondents prefer to pay less. All the other features contain high variability, confirmed by the low p-values, suggesting that tailored packages appealing to distinct customers are potential option. Additionally, the positive correlation between `Price1500` and `Price2500` supports the idea of creating a separate offer for luxurious trips. Lastly, there is a strong correlation between `Transportplane` and `Transporttrain`. This suggest potential for creating a combined transportation package.
+First, there is a high correlation between the following pairs of destinations: `Portugal-Spain`, `Portugal-Turkey`, `Spain-Turkey`. Primarily, this means that if a consumer liked one of this options, is very likely to also enjoy the other one in the pair; but also offers that combine these options should be well received. Second, the low variability in preferences for low prices indicates a universal preference for cheaper options, all respondents prefer to pay less. All the other features contain high variability, confirmed by the low p-values, suggesting that tailored packages appealing to distinct customers are potential option. Additionally, the positive correlation between `Price1500` and `Price2500` supports the idea of creating a separate offer for luxurious trips. Lastly, there is a strong correlation between `Transportplane` and `Transporttrain`. This suggest potential for creating a combined transportation package.
 
 ```{r plot mixed model2, fig.cap="Distributions of Random Coefficients in the Best Mixed MNL Model"}
 #| echo: false
@@ -350,7 +351,7 @@ par(mfrow = c(4, 3), mar = c(2, 2, 2, 1),  cex.main=0.9)
 plot(model2.mixed2)
 ```
 
-The analysis of the model reveals several interesting preferences among respondents (see Figure 3-4). First, while the majority of individuals prefer shorter stays, approximately 9% actually favor 10-day stays over 2-day ones. Regarding accommodation, 8% of respondents prefer budget options over 3-star accommodations, yet 96% of respondents prefer 5-star hotels over budget options. In terms of transportation, 22% of respondents prefer traveling by bus over flying, and 67% prefer the bus to the train. When considering destinations, although almost everyone prefers Portugal and Spain over Greece, 27% of respondents actually prefer Greece to Turkey. Finally, the analysis shows a clear preference for cheaper options, as respondents consistently favor lower-priced choices across the board. These findings highlight the diversity in individual preferences, suggesting that there is significant variability in how different respondents evaluate the same attributes.
+The analysis of the model reveals several relevant preferences among respondents (see Figure 3-4). First, while the majority of individuals prefer shorter stays, approximately 9% actually favor 10-day stays over 2-day ones. Regarding accommodation, 8% of respondents prefer budget options over 3-star accommodations, yet 96% of respondents prefer 5-star hotels over budget options. In terms of transportation, 22% of respondents prefer traveling by bus over flying, and 67% prefer the bus to the train. When considering destinations, although almost everyone prefers Portugal and Spain over Greece, 27% of respondents actually prefer Greece to Turkey. Finally, the analysis shows a clear preference for cheaper options, as respondents consistently favor lower-priced choices across the board. These findings highlight the diversity in individual preferences, suggesting that there is significant variability in how different respondents evaluate the same attributes.
 
 ## 6. Preference Shares and Sensitivity Charts
 
@@ -358,9 +359,17 @@ The analysis of the model reveals several interesting preferences among responde
 
 Another useful approach to assess the role of product attributes consists on using the fitted model to obtain preference share predictions. By changing the levels’ attributes of the planned design we can observe how variations in the design influence the preference shares.
 
-The reference package includes the following attributes: **Price**: 383, **Duration**: 8 days, **Accommodation**: 5 stars, **Transport**: Plane, **Destination**: Portugal. This package was chosen as the reference based on results from the models we fitted earlier. It serves as a benchmark for comparing and evaluating other packages, ensuring consistency in interpreting the model outputs.
+The reference package includes the following attributes:
 
-The analysis, was again, indicates that price and accommodation quality are critical factors influencing customer preferences, with affordable options paired with premium accommodations performing the best. Portugal emerges as the most preferred destination, consistently attracting higher preference shares. Packages that achieve a balance between cost, comfort, and convenience tend to be the most appealing. In contrast, adjustments such as switching transport modes from plane to bus, lowering accommodation quality, or increasing prices significantly reduce preference shares.
+- **Price**: 383,
+- **Duration**: 8 days,
+- **Accommodation**: 5 stars,
+- **Transport**: Plane,
+- **Destination**: Portugal.
+
+This package was chosen as the reference based on results from the models we fitted earlier. It serves as a benchmark for comparing and evaluating other packages, ensuring consistency in interpreting the model outputs.
+
+The analysis indicates that price and accommodation quality are critical factors influencing customer preferences, with affordable options paired with premium accommodations performing the best. Portugal emerges as the most preferred destination, consistently attracting higher preference shares. Packages that achieve a balance between cost, comfort, and convenience tend to be the most appealing. In contrast, adjustments such as switching transport modes from plane to bus, lowering accommodation quality, or increasing prices significantly reduce preference shares.
 
 ```{r preference shares}
 #| echo: false
@@ -407,9 +416,7 @@ predict.mixed.mnl(model2.mixed2, data=new.data)
 
 ### Sensitivity Charts
 
-The main insights derived from the sensitivity chart emphasize the critical role of destination, transportation, accommodation, duration, and price in shaping preferences. 
-
-Portugal stands out as the most attractive destination, increasing the Preference Share (PS) by approximately 0.5%. Spain, while reducing market share by 12.3%, remains somewhat competitive. In contrast, Turkey and Greece reduce market share by 26.3% and 28.8%, respectively, making them the least preferred destinations.
+Portugal stands out as the most attractive destination, increasing the Preference Share (PS) by approximately 0.5%. Spain, while reducing market share by 12.3%, remains somewhat competitive. In contrast, Turkey and Greece reduce market share by larger margins (26.3% and 28.8%, respectively) making them less preferred destinations.
 
 In terms of transportation, traveling by plane slightly increases market share by 0.3%, making it the most preferred option. Bus travel reduces market share by 12.8%, reflecting moderate aversion, while train travel decreases market share by 22.2%, indicating it is the least preferred mode of transport.
 
@@ -557,9 +564,9 @@ The main products of the company should be:
 
 Also, we encourage the company to save contact information of those tourists who already traveled with options 1. or 2. and establish remarketing campaigns offering:
 
--   The alternative option. That is, if the client already went to Portugal, offer a trip to Spain. Inversely, if the client went already to Spain, offer Portugal.
+-   The alternative option. That is, if the client already went to Portugal, offer a trip to Spain. Inversely, if the client went already to Spain, offer Portugal. The strong correlation between these destinations motivates this recommendation.
 
-3.  **Short trip to Turkey**: following the other characteristics with offers 1. and 2.
+3.  **Short trip to Turkey**: following the rest of the characteristics from offers 1. and 2.
 
 Then, the following alternative offers should be tried out as niche options. Some of these include:
 
@@ -567,7 +574,7 @@ Then, the following alternative offers should be tried out as niche options. Som
 
 5.  **Low-budget alternatives to offers 1. and 2.**: Considering the high price sensitivity of the average respondent and a niche of users that have budget-hotel
 
-On offers 4. and 5., we recommend to avoid promoting broadly these options (in opposition to offers 1. and 2., aimed for the massive public). Instead the agency should try to identify the market segment and direct the promotion just towards the users belonging to those niches. For this segmentation we propose to perform a client clustering that finds more granular information on these niches, and only then target the promotions specifically to those who share (demographic/behavioural/geographic/psychographic) variables with those clusters.
+On offers 4. and 5., we recommend to avoid broad promotions (in opposition to offers 1. and 2., aimed for the massive public). Instead, the agency should try to identify the market segment and direct the promotion just towards the users belonging to those niches. For this segmentation we propose to perform a client clustering that finds more granular information on these niches, and only then target the promotions specifically to those who share (demographic/behavioural/geographic/psychographic) variables with those clusters.
 
 Finally, some points that the agency tour planners could benefit from:
 
@@ -580,8 +587,3 @@ Finally, some points that the agency tour planners could benefit from:
 Throughout this study we identified significant consumer preferences for vacation packages from the Choice-Based Conjoint Analysis perspective. By systematically analyzing attributes such as price, duration, accommodation, transportation, and destination, we came out with 5 actionable insights for the tour agency.
 
 Key insights from the analysis highlight a strong sensitivity to price, a clear preference for short trips (2 nights), and a significant inclination toward 5-star accommodations and plane travel. Additionally, niche markets were identified and detailed in the results section. To ensure our recommendations reflect real-world consumer diversity, we combined findings from a fixed-effects multinomial logit model, which captures average respondent behavior, with a mixed-effects model featuring correlated random coefficients to account for individual differences.
-
-
-## 9. References
-
--   Cite all references, including academic, literature, data sources, and tools used.

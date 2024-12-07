@@ -1,17 +1,22 @@
-# ConjointAnalysis-TourAgency-2024
+# Choice-Based Conjoint Analysis for Vacation Preferences
 
-## Installation
+This repository presents an analysis of vacation preferences using **Choice-Based Conjoint Analysis (CBC)** and advanced statistical modeling. The study employs **Multinomial Logit (MNL)** and **Mixed Logit Models** to explore consumer decision-making and extract actionable insights for product design and marketing.
 
-1. **Install R**: Make sure you have R installed on your system. You can download it from [CRAN](https://cran.r-project.org/).
-2. **Install Required Packages**: Run the following script to install the required dependencies:
+Key tools such as **Likelihood Ratio Tests**, **Preference Shares**, and **Sensitivity Charts** are applied to validate models and derive actionable insights. The synthetic dataset focuses on attributes like price, duration, accommodation, transport, and destination. While the vacation scenario is illustrative, the methodologies are generalizable across domains.
 
-```r
-source("install.R")
+The study is based on a synthetic dataset simulating vacation package choices. While the data is illustrative, the methods are applicable across various fields such as marketing, product design, and behavioral economics.
 
 
-## TO-DOs
+## Project Structure
+- `data/`: Contains datasets.
+- `scripts/`: Scripts for analysis and utilities.
+- `outputs/`: Generated outputs (figures, tables, reports).
+- `install.R`: Script for installing required packages.
+- Find the final report at `outputs/reports/final_report.qmd`.
 
-- [ ] Analyze the random effects for each attribute-level pair (or at least the most important ones) [Lines 218-244]
-- [ ] Check whether Sensitivity Chart can be adapted to model2.mixed2 (best fitting model)
-- [ ] Managerial Decisions (none of this was properly done so far, only sparce intents)
-- [ ] IDEA: Create customer clusters to target marketing and/or establish offers programatically (this wasn't seen in the course but we know how to do it and IMO would be a very nice extra, something else than just adapting his code to our dataset)
+
+## Authors (alphabetically)
+- Andrea Bortoluzzi
+- Ricardo Esquivel D'Avanzo
+- Maria Starodubtseva
+- Joaquin Lopez Calvo

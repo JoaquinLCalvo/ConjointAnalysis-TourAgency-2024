@@ -46,6 +46,8 @@ vacation <- read.csv("./CBC_Vacation_data.csv", header = TRUE, sep = ";")
 
 ```
 
+
+
 ## 1. Introduction
 
 Understanding consumer preferences is crucial for designing products and services that resonate with target audiences. Conjoint analysis is a widely used method for modeling decision-making processes, enabling researchers to quantify the importance of different product attributes and the trade-offs consumers are willing to make. By presenting respondents with hypothetical scenarios, this approach allows for a detailed exploration of how specific features influence consumption choices.
@@ -80,6 +82,8 @@ Each respondent faced multiple choice tasks, with each task consisting of four v
 
 To illustrate the structure of the dataset, let us examine the first few observations (see Table 1). In the first four rows, respondent 1 selects the third alternative (price €500, duration 5 days, accommodation 5 stars, transport by bus, and destination Turkey) when faced to question 1, as indicated by a `choice` value of 1. The other alternatives were not chosen, as reflected by a `choice` value of 0.
 
+
+
 ```{r table, tab.cap="Sample of the Dataset", out.width="100%", fig.align="center"}
 #| echo: false
 # Load required packages
@@ -91,11 +95,15 @@ kable(head(vacation, 8)) %>%
   kable_styling(latex_options = c("striped", "scale_down"))
 ```
 
+
+
 ## 3. Data Exploration
 
 The dataset contains `r length(unique(vacation$resp.id))` respondents who completed `r length(unique(vacation[vacation$resp.id == 1, "ques"]))` choice tasks each, resulting in `r length(vacation[vacation$resp.id == 1, "ques"])` observations per respondent and a total of `r nrow(vacation)` observations.
 
 Before proceeding with the analysis, we will conduct an exploratory data analysis to gain insights into the distribution of variables, identify potential issues, and prepare the data for modeling.
+
+
 
 ```{r data exploration}
 #| echo: false
@@ -119,9 +127,13 @@ skim(vacation)
 #length(unique(vacation[vacation$resp.id == 1, "ques"]))
 ```
 
+
+
 Upon reviewing the summary statistics, it is observed that there are no missing values in the dataset (see Table 2). However, some variables have incorrect data types, which are corrected to ensure proper analysis. Specifically, the `Price`, `Duration`, `Accommodation`, `Transport`, and `Destination` variables were converted into factors. This transformation ensures that each categorical attribute is correctly handled in the CBC analysis.
 
 The distribution of the response variable indicates that the choices are relatively balanced across the four alternatives, suggesting no significant bias in the data. This balance is essential for accurate estimation of preference parameters. Additionally, the frequencies of attributes show a relatively even distribution, indicating that the levels of each attribute are well-represented in the dataset.
+
+
 
 ```{r response variable distribution, fig.height = 3, fig.cap="Distribution of choice between the alternatives"}
 #| echo: false
@@ -176,6 +188,8 @@ vacation %>%
 vacation_mlogit <- dfidx(vacation, idx = list(c("ques", "resp.id"), "alt"))
 ```
 
+
+
 ## 4. Fitting Models with Fixed Effects
 
 This study aims to examine the relationship between consumer choices and product attributes, with a focus on understanding which vacation packages are the most appealing to customers. To achieve this goal, we employed a discrete choice modeling approach, specifically a Multinomial Logit (MNL) regression.
@@ -186,6 +200,8 @@ Let us first fit a baseline MNL model to the data with the following specificati
 -   Independent Variables: `Price`, `Duration`, `Accommodation`, `Transport`, and `Destination`
 -   Model Characteristics: This model includes **intercepts** and only accounts for **fixed effects**, assuming homogeneous preferences across respondents without considering random variation in preferences or unobserved heterogeneity.
 
+
+
 ```{r model1}
 #| echo: false
 # Fit the model with intercept parameters
@@ -195,9 +211,13 @@ model1 <- mlogit(choice ~ Price + Duration + Accommodation +
 round(summary(model1)$CoefTable, 5)
 ```
 
+
+
 The alternative-specific constants represent preferences for the positions of the alternatives within each question. Specifically, the parameters `(Intercept):2`, `(Intercept):3`, and `(Intercept):4` quantify the preference for each position from left to right relative to the first position on the left. The estimated MNL model indicates that these intercepts are very small and not statistically significant. To improve model parsimony and precision, we have chosen to exclude these intercepts from the analysis, thereby reducing the degrees of freedom.
 
 We formally evaluate the decision to remove the intercepts using a likelihood ratio test. This test compares the larger model `model1`, which includes the intercepts, with a smaller `model2` that excludes them. The comparison between the full model and the reduced model without intercepts yields a p-value of `0.7185`. Given this high p-value, we conclude that there is no significant difference in goodness of fit between the two models, indicating that both explain the data equally well. Consequently, the alternative-specific constants are not essential for adequately modeling the data.
+
+
 
 ```{r model2}
 #| echo: false
@@ -209,7 +229,11 @@ model2 <- mlogit(choice ~ Price + Duration + Accommodation +
 lrtest(model2, model1)
 ```
 
+
+
 We continue to explore opportunities to simplify the model. In the previous analysis, the attribute `price` was treated as a qualitative variable. We now incorporate it as a quantitative predictor in order to understand if the model's predictive power remains consistent.
+
+
 
 ```{r model3}
 #| echo: false
@@ -220,25 +244,35 @@ model3 <- mlogit(choice ~ as.numeric(as.character(Price)) +
 lrtest(model3, model2)
 ```
 
+
+
 Again, we formally evaluate the decision to transform the attribute from qualitative, to quantitative, using a likelihood ratio test. Given the extremely low p-value, we reject the null hypothesis and select `model2` over `model3`. That is, the model with price as a qualitative variable is superior in terms of goodness of fit.
 
 ### Interpretation of the Selected Model
 
 The selected model (`model2`) provides valuable insights into consumer preferences for vacation packages. On average, we observe a clear price sensitivity, as the prices increase, the likelihood of selection decreases. Regarding the duration of the offered options, the most favored option is a short 2 night trip, followed by a longer 10 night trip. The intermediate 5 day trip is the least preferred. Accommodation preferences show a strong inclination towards 5-star hotels, followed by 3-star. Low cost options are ranked lowest. For transportation options, planes are most preferred, followed by bus and trains being the least desirable. Regarding the destination, the most preferred country is Portugal, followed by Spain and then Turkey. Greece is the least desirable destination on average.
 
+
+
 ```{r model2 coefficients}
 #| echo: false
 round(summary(model2)$CoefTable, 5)
 ```
 
+
+
 ### Willingness to Pay
 
 We can further improve our interpretation of the model by calculating the willingness to pay for each level's attribute utilizing the version of the model that treats price as a quantitative attribute. We obtain this value computing the ratio between the model parameter for that level and the price parameter. The results represent the monetary value that respondents are willing to pay for changes in each attribute.
+
+
 
 ```{r willingness to pay}
 #| echo: false
 - coef(model3) / coef(model3)["as.numeric(as.character(Price))"]
 ```
+
+
 
 Upon analysis of the results, we find strong preferences on the monetary value respondents place on various vacation attributes. For trip duration, respondents are willing to pay up to €1948.53 more for a 2-night vacation instead of a 5-night vacation and €1312.81 more for a 2-night vacation instead of a 10-night vacation, showing a strong preference for shorter trips. Regarding accommodation, customers value high-end options significantly, being willing to pay €555.56 more for a 3-star hotel over a budget hotel and €2219.09 more for a 5-star hotel over a budget option. In terms of transportation, respondents are willing to pay €848.05 more to fly instead of taking a bus, while preferring a bus over a train by €386.12. Finally, regarding destination preferences, an average customer is willing to pay €2817.97 more to visit Portugal over Greece, €1947.53 more to visit Spain over Greece, and €790.83 more to visit Turkey over Greece.
 
@@ -252,6 +286,8 @@ In this section, we fit mixed logit models in order to capture individual differ
 
 First, let us fit a mixed MNL model without correlation of random coefficients. The results will show the estimated standard deviations for each attribute, which represent the level of heterogeneity in preferences across respondents.
 
+
+
 ```{r mixed model1}
 #| echo: false
 model2.rpar <- rep("n", length=length(model2$coef))
@@ -264,18 +300,26 @@ model2.mixed <- mlogit(choice ~ Price + Duration + Accommodation +
 round(summary(model2.mixed)$CoefTable, 5)
 ```
 
+
+
 We notice that almost all the standard deviation coefficients are statistically significant with low p-values. The biggest variability is observed for transportation by train, longer stays, 5-star accommodation and Turkey as a destination. This indicates that respondents might have diverse preferences for these attributes, with some individuals valuing them more than others.
 
 The likelihood ratio test also indicates that the inclusion of random coefficients improves the model's fit significantly, reinforcing the importance of accounting for individual differences in choice behavior.
+
+
 
 ```{r compare model2 and mixed model1}
 #| echo: false
 lrtest(model2, model2.mixed)
 ```
 
+
+
 ### Correlated Random Coefficients
 
 To better understand the strength of associations among random coefficients, we extract a correlation matrix by setting `correlation = TRUE` in the mixed multinomial logit (MNL) model. This allows us to examine how respondents' preferences for different attributes are interrelated, providing deeper insights into preference correlations.
+
+
 
 ```{r mixed model2}
 #| echo: false
@@ -291,11 +335,15 @@ model2.mixed2 <- update(model2.mixed, correlation = TRUE)
 lrtest(model2.mixed, model2.mixed2)
 ```
 
+
+
 The extremely low p-value (\< 0.001) of the likelihood ratio test suggests that the additional complexity in Model 2 (model2.mixed2) significantly improves the model's ability to explain the data compared to Model 1 (model2.mixed). Therefore, we select the mixed MNL model with correlated random coefficients as the best model so far to capture individual differences in preferences.
 
 ### Strongly Correlated Features
 
 Finally, we try fitting a model with only the strongly correlated features (correlation \>= 0.7) to check if the model may be simplified without losing much information. This can help reduce the complexity of the model and improve its interpretability.
+
+
 
 ```{r get strongly correlated features}
 #| echo: false
@@ -331,16 +379,24 @@ lrtest(model2.mixed3, model2.mixed2)
 # Winner: all correlated random effects MNL (model2.mixed2)
 ```
 
+
+
 The likelihood ratio test indicates that the model with all correlated random effects (model2.mixed2) is superior to the model with only strongly correlated features (model2.mixed3). Therefore, we conclude that the mixed MNL model with all correlated random coefficients is the best model to capture individual differences in preferences.
 
 ### Interpretation of the Best Model
+
+
 
 ```{r}
 #| echo: false
 round(summary(model2.mixed3)$CoefTable, 5)[17:52, ]
 ```
 
+
+
 First, there is a high correlation between the following pairs of destinations: `Portugal-Spain`, `Portugal-Turkey`, `Spain-Turkey`. This provides insights about new offers that can be tailored combining these options. Second, the low variability in preferences for low prices indicates a universal preference for cheaper options, all respondents prefer to pay less. All the other features contain high variability, confirmed by the low p-values, suggesting that tailored packages appealing to distinct customers are potential option. Additionally, the positive correlation between `Price1500` and `Price2500` supports the idea of creating a separate offer for luxurious trips. Lastly, there is a strong correlation between `Transportplane` and `Transporttrain`. This suggest potential for creating a combined transportation package.
+
+
 
 ```{r plot mixed model2, fig.cap="Distributions of Random Coefficients in the Best Mixed MNL Model"}
 #| echo: false
@@ -349,6 +405,8 @@ par(mfrow = c(4, 3), mar = c(2, 2, 2, 1),  cex.main=0.9)
 #plot(model2.mixed) # This model is suboptimal, therefore we should use the other one
 plot(model2.mixed2)
 ```
+
+
 
 The analysis of the model reveals several interesting preferences among respondents (see Figure 3-4). First, while the majority of individuals prefer shorter stays, approximately 9% actually favor 10-day stays over 2-day ones. Regarding accommodation, 8% of respondents prefer budget options over 3-star accommodations, yet 96% of respondents prefer 5-star hotels over budget options. In terms of transportation, 22% of respondents prefer traveling by bus over flying, and 67% prefer the bus to the train. When considering destinations, although almost everyone prefers Portugal and Spain over Greece, 27% of respondents actually prefer Greece to Turkey. Finally, the analysis shows a clear preference for cheaper options, as respondents consistently favor lower-priced choices across the board. These findings highlight the diversity in individual preferences, suggesting that there is significant variability in how different respondents evaluate the same attributes.
 
@@ -361,6 +419,8 @@ Another useful approach to assess the role of product attributes consists on usi
 The reference package includes the following attributes: **Price**: 383, **Duration**: 8 days, **Accommodation**: 5 stars, **Transport**: Plane, **Destination**: Portugal. This package was chosen as the reference based on results from the models we fitted earlier. It serves as a benchmark for comparing and evaluating other packages, ensuring consistency in interpreting the model outputs.
 
 The analysis, was again, indicates that price and accommodation quality are critical factors influencing customer preferences, with affordable options paired with premium accommodations performing the best. Portugal emerges as the most preferred destination, consistently attracting higher preference shares. Packages that achieve a balance between cost, comfort, and convenience tend to be the most appealing. In contrast, adjustments such as switching transport modes from plane to bus, lowering accommodation quality, or increasing prices significantly reduce preference shares.
+
+
 
 ```{r preference shares}
 #| echo: false
@@ -405,6 +465,8 @@ predict.mixed.mnl(model2.mixed2, data=new.data)
 
 ```
 
+
+
 ### Sensitivity Charts
 
 The main insights derived from the sensitivity chart emphasize the critical role of destination, transportation, accommodation, duration, and price in shaping preferences. 
@@ -418,6 +480,8 @@ For accommodations, 5-star options slightly increase market share by 0.7%, demon
 Regarding trip duration, a 2-day trip slightly increases market share by 0.5%, making it the most appealing choice. A 10-day trip reduces market share by 19.7%, signaling that longer durations are less desirable, while a 5-day trip decreases market share by 26.9%, making it the least favorable duration.
 
 Finally, price has a significant influence. A price of 500 increases market share by 10.2%, indicating that lower pricing strongly enhances attractiveness. A price of 800 results in a minimal decrease of 0.3%, suggesting it is near the optimal price point. A mid-range price of 1500 reduces market share by 10.2%, showing moderate sensitivity, while the highest price option, 2500, reduces market share by 20.3%, highlighting that higher prices significantly deter preferences.
+
+
 
 ```{r sensitivity chart1}
 #| echo: false
@@ -475,9 +539,6 @@ grid(nx = NA, ny = NULL)
 
 ```
 
-
-
-
 ```{r sensitivity chart}
 #| echo: false
 
@@ -522,6 +583,8 @@ grid(nx = NA, ny = NULL)
 #of the visual.
 
 ```
+
+
 
 ## 7. Results
 
@@ -585,3 +648,4 @@ Key insights from the analysis highlight a strong sensitivity to price, a clear 
 ## 9. References
 
 -   Cite all references, including academic, literature, data sources, and tools used.
+

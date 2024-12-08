@@ -43,7 +43,7 @@ library(MASS)
 #| echo: false
 
 # Load the data
-vacation <- read.csv("./CBC_Vacation_data.csv", header = TRUE, sep = ";")
+vacation <- read.csv("./data/CBC_Vacation_data.csv", header = TRUE, sep = ";")
 
 ```
 
@@ -251,7 +251,7 @@ In this section, we fit mixed logit models in order to capture individual differ
 
 ### Uncorrelated Random Coefficients
 
-First, let us fit a mixed MNL model without correlation of random coefficients. The results will show the estimated standard deviations for each attribute, which represent the level of heterogeneity in preferences across respondents.
+First, let us fit a mixed MNL model without correlation of random coefficients. The results show the estimated standard deviations for each attribute, which represent the level of heterogeneity in preferences across respondents.
 
 ```{r mixed model1}
 #| echo: false
@@ -265,7 +265,7 @@ model2.mixed <- mlogit(choice ~ Price + Duration + Accommodation +
 round(summary(model2.mixed)$CoefTable, 5)
 ```
 
-We notice that almost all the standard deviation coefficients are statistically significant with low p-values. The biggest variability is observed for transportation by train, longer stays, 5-star accommodation and Turkey as a destination. This indicates that respondents might have diverse preferences for these attributes, with some individuals valuing them more than others.
+We notice that almost all the standard deviation coefficients are statistically significant with low p-values. The biggest variability is observed for transportation by train, longer stays, 5-star accommodation and Turkey as a destination. This indicates that respondents have diverse preferences for these attributes, with some individuals valuing them more than others. No variability is observed for the Portugal and Spain as destinations, suggesting that respondents have similar preferences for these countries.
 
 The likelihood ratio test also indicates that the inclusion of random coefficients improves the model's fit significantly, reinforcing the importance of accounting for individual differences in choice behavior.
 
@@ -276,7 +276,7 @@ lrtest(model2, model2.mixed)
 
 ### Correlated Random Coefficients
 
-To better understand the strength of associations among random coefficients, we extract a correlation matrix by setting `correlation = TRUE` in the mixed multinomial logit (MNL) model. This allows us to examine how respondents' preferences for different attributes are interrelated, providing deeper insights into preference correlations.
+To better understand the associations among random coefficients, we fit a mixed MNL model with correlated random coefficients, allowing for the estimation of a full covariance matrix to capture interdependencies among the random effects.
 
 ```{r mixed model2}
 #| echo: false
@@ -292,11 +292,11 @@ model2.mixed2 <- update(model2.mixed, correlation = TRUE)
 lrtest(model2.mixed, model2.mixed2)
 ```
 
-The extremely low p-value (\< 0.001) of the likelihood ratio test suggests that the additional complexity in Model 2 (model2.mixed2) significantly improves the model's ability to explain the data compared to Model 1 (model2.mixed). Therefore, we select the mixed MNL model with correlated random coefficients as the best model so far to capture individual differences in preferences.
+The extremely low p-value ($< 0.001$) of the likelihood ratio test suggests that the additional complexity in Model 2 (model2.mixed2) significantly improves the model's ability to explain the data compared to Model 1 (model2.mixed). Therefore, we select the mixed MNL model with correlated random coefficients as the best model so far to capture individual differences in preferences.
 
 ### Strongly Correlated Features
 
-Finally, we try fitting a model with only the strongly correlated features (correlation \>= 0.7) to check if the model may be simplified without losing much information. This can help reduce the complexity of the model and improve its interpretability.
+Finally, we try fitting a model with only the strongly correlated features (correlation $\geq 0.7$) to check if the model may be simplified without losing much information. This can help reduce the complexity of the model and improve its interpretability.
 
 ```{r get strongly correlated features}
 #| echo: false
@@ -336,12 +336,28 @@ The likelihood ratio test indicates that the model with all correlated random ef
 
 ### Interpretation of the Best Model
 
-```{r}
+The best mixed MNL model (`model2.mixed2`) provides insights into heterogeneity in preferences among travelers by estimating random coefficients and their correlations. 
+
+```{r summary of model2.mixed2}
 #| echo: false
-round(summary(model2.mixed3)$CoefTable, 5)[17:52, ]
+summary_vcov <- summary(vcov(model2.mixed2, what = "rpar", type = "cor"))
+summary_df <- data.frame(Estimate = summary_vcov[, 1], 
+                         Std_Error = summary_vcov[, 2], 
+                         z_value = summary_vcov[, 3], 
+                         p_value = summary_vcov[, 4])
+summary_df$Variable <- rownames(summary_vcov)
+threshold <- 0.05
+significant_results <- summary_df[summary_df$p_value <= threshold, ]
+significant_results$p_value <- round(significant_results$p_value, 5)
+significant_results$Estimate <- round(significant_results$Estimate, 5)
+significant_results$Std_Error <- round(significant_results$Std_Error, 5)
+significant_results$z_value <- round(significant_results$z_value, 5)
+significant_results
 ```
 
-First, there is a high correlation between the following pairs of destinations: `Portugal-Spain`, `Portugal-Turkey`, `Spain-Turkey`. Primarily, this means that if a consumer liked one of this options, is very likely to also enjoy the other one in the pair; but also offers that combine these options should be well received. Second, the low variability in preferences for low prices indicates a universal preference for cheaper options, all respondents prefer to pay less. All the other features contain high variability, confirmed by the low p-values, suggesting that tailored packages appealing to distinct customers are potential option. Additionally, the positive correlation between `Price1500` and `Price2500` supports the idea of creating a separate offer for luxurious trips. Lastly, there is a strong correlation between `Transportplane` and `Transporttrain`. This suggest potential for creating a combined transportation package.
+Once again, the results show that the standard deviations of random coefficients are statistically significant almost for all the attributes, indicating substantial heterogeneity in preferences among respondents. Interestingly, there exists variability in the higher price range, with the `Price1500` and `Price2500` coefficients having significant standard deviations, but low variability in the lower price ranges (insignificant p-values are not shown in the table above). 
+
+In addition, the correlations between random coefficients reveal interesting patterns of association among attributes. First, there is a high correlation between the following pairs of destinations: `Portugal-Spain`, `Portugal-Turkey`, `Spain-Turkey`. Primarily, this means that if a consumer prefers one of these options, they are likely to also enjoy the other in the pair. Additionally, offers that combine the destinations should be well received. Second, the positive correlation between `Price1500` and `Price2500` supports the idea of creating a separate offer for luxurious trips. Moreover, there is a strong correlation between `Transportplane` and `Transporttrain`. This suggest potential for creating a combined transportation package.
 
 ```{r plot mixed model2, fig.cap="Distributions of Random Coefficients in the Best Mixed MNL Model"}
 #| echo: false
@@ -351,25 +367,23 @@ par(mfrow = c(4, 3), mar = c(2, 2, 2, 1),  cex.main=0.9)
 plot(model2.mixed2)
 ```
 
-The analysis of the model reveals several relevant preferences among respondents (see Figure 3-4). First, while the majority of individuals prefer shorter stays, approximately 9% actually favor 10-day stays over 2-day ones. Regarding accommodation, 8% of respondents prefer budget options over 3-star accommodations, yet 96% of respondents prefer 5-star hotels over budget options. In terms of transportation, 22% of respondents prefer traveling by bus over flying, and 67% prefer the bus to the train. When considering destinations, although almost everyone prefers Portugal and Spain over Greece, 27% of respondents actually prefer Greece to Turkey. Finally, the analysis shows a clear preference for cheaper options, as respondents consistently favor lower-priced choices across the board. These findings highlight the diversity in individual preferences, suggesting that there is significant variability in how different respondents evaluate the same attributes.
+The analysis of the distributions of random coefficients in the best mixed MNL model further reveal several relevant preferences among respondents (see Figure 3-4). First, while the majority of individuals prefer shorter stays, approximately 9% actually favor 10-day stays over 2-day ones. Regarding accommodation, 8% of respondents prefer budget options over 3-star accommodations, yet 96% of respondents prefer 5-star hotels over budget options. In terms of transportation, 22% of respondents prefer traveling by bus over flying, and 67% prefer the bus to the train. When considering destinations, although almost everyone prefers Portugal and Spain over Greece, 27% of respondents actually prefer Greece to Turkey. Finally, the analysis shows a clear preference for cheaper options, as respondents consistently favor lower-priced choices. 
 
 ## 6. Preference Shares and Sensitivity Charts
 
 ### Preference Shares
 
-Another useful approach to assess the role of product attributes consists on using the fitted model to obtain preference share predictions. By changing the levels’ attributes of the planned design we can observe how variations in the design influence the preference shares.
+Another useful approach to assess the role of product attributes consists on using the fitted model to obtain preference share predictions. By varying the attribute levels of the planned design, we can observe how variations in the design influence the preference shares.
 
 The reference package includes the following attributes:
 
-- **Price**: 383,
-- **Duration**: 8 days,
+- **Price**: 800,
+- **Duration**: 2 days,
 - **Accommodation**: 5 stars,
 - **Transport**: Plane,
 - **Destination**: Portugal.
 
-This package was chosen as the reference based on results from the models we fitted earlier. It serves as a benchmark for comparing and evaluating other packages, ensuring consistency in interpreting the model outputs.
-
-The analysis indicates that price and accommodation quality are critical factors influencing customer preferences, with affordable options paired with premium accommodations performing the best. Portugal emerges as the most preferred destination, consistently attracting higher preference shares. Packages that achieve a balance between cost, comfort, and convenience tend to be the most appealing. In contrast, adjustments such as switching transport modes from plane to bus, lowering accommodation quality, or increasing prices significantly reduce preference shares.
+This package was chosen as the reference based on results from the models fitted earlier. 
 
 ```{r preference shares}
 #| echo: false
@@ -389,25 +403,24 @@ predict.mixed.mnl <- function(model, data, nresp=1000) {
   
 }
 
+# Set the random seed for reproducibility
+set.seed(123)
 # Defining the data frame containing the set of possible designs 
-attributes <- list(
-  Price = unique(vacation$Price),
-  Duration = unique(vacation$Duration),
-  Accommodation = unique(vacation$Accommodation),
-  Transport = unique(vacation$Transport),
-  Destination = unique(vacation$Destination)
-)
-allDesign <- expand.grid(attributes) 
+attributes <- list(Price=names(table(vacation_mlogit$Price)),
+                   Duration=names(table(vacation_mlogit$Duration)),
+                   Accommodation=names(table(vacation_mlogit$Accommodation)),
+                   Transport=names(table(vacation_mlogit$Transport)),
+                   Destination=names(table(vacation_mlogit$Destination)))
+                   
+allDesign <- expand.grid(attributes)
 
 # MAKE Price 800, Duration 2, Accommodation 5 stars, Transport plane, Destination Portugal as reference package
-allDesign[allDesign$Price == "800" & allDesign$Duration == "2" & allDesign$Accommodation == "5stars" & allDesign$Transport == "plane" & allDesign$Destination == "Portugal", ] # 383
+reference_package <- as.numeric(rownames(allDesign[allDesign$Price == "800" & allDesign$Duration == "2" & allDesign$Accommodation == "5stars" & allDesign$Transport == "plane" & allDesign$Destination == "Portugal", ]))
 
-new.data <- allDesign[c(383, 24, 59, 95,
-                        115, 146, 200, 205,
-                        231, 256, 279, 298,
-                        331, 366, 401, 431), ]  
-
-# CHANGE new.data to have different packages
+new.data <- allDesign[c(reference_package, 115, 146, 200,
+                        49, 71, 85, 26,
+                        239, 288, 241, 298,
+                        331, 366, 401, 431), ] 
 
 set.seed(47)
 predict.mixed.mnl(model2.mixed2, data=new.data) 
@@ -415,6 +428,8 @@ predict.mixed.mnl(model2.mixed2, data=new.data)
 ```
 
 ### Sensitivity Charts
+
+CHECK INTERPRETATION
 
 Portugal stands out as the most attractive destination, increasing the Preference Share (PS) by approximately 0.5%. Spain, while reducing market share by 12.3%, remains somewhat competitive. In contrast, Turkey and Greece reduce market share by larger margins (26.3% and 28.8%, respectively) making them less preferred destinations.
 
@@ -475,7 +490,7 @@ tradeoff1$labels <- paste0(rep(names(attributes), sapply(attributes, length)),
 # Plot the sensitivity analysis
 barplot(tradeoff1$increase, horiz = FALSE, names.arg = tradeoff1$labels, las = 2, 
         ylab = "Change in Share for the Planned Product Design", 
-        ylim = c(-0.3, 0.12), cex.names = 0.7)
+        cex.names = 0.7)
 grid(nx = NA, ny = NULL)
 
 

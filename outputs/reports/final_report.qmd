@@ -43,7 +43,7 @@ library(MASS)
 #| echo: false
 
 # Load the data
-vacation <- read.csv("./data/CBC_Vacation_data.csv", header = TRUE, sep = ";")
+vacation <- read.csv("../../data/CBC_Vacation_data.csv", header = TRUE, sep = ";")
 
 ```
 
@@ -51,7 +51,7 @@ vacation <- read.csv("./data/CBC_Vacation_data.csv", header = TRUE, sep = ";")
 
 Understanding consumer preferences is crucial for designing products and services that resonate with target audiences. Conjoint analysis is a widely used method for modeling decision-making processes, enabling researchers to quantify the importance of different product attributes and the trade-offs consumers are willing to make. By presenting respondents with hypothetical scenarios, this approach allows for a detailed exploration of how specific features influence consumption choices.
 
-This study focuses on vacation planning, a domain where consumer decisions are influenced by a range of factors, including price, duration, accommodation, transport, and destination. The goal of the analysis is to identify the key drivers of consumer preferences for vacation packages and to provide actionable insights for the travel and tourism industry. These findings can help businesses design offerings that better meet the needs and expectations of potential customers. The github repository for this project is ("https://github.com/JoaquinLCalvo/ConjointAnalysis-TourAgency-2024").
+This study focuses on vacation planning, a domain where consumer decisions are influenced by a range of factors, including price, duration, accommodation, transport, and destination. The goal of the analysis is to identify the key drivers of consumer preferences for vacation packages and to provide actionable insights for the travel and tourism industry. These findings can help businesses design offerings that better meet the needs and expectations of potential customers. The github repository for this project is available [here](https://github.com/JoaquinLCalvo/ConjointAnalysis-TourAgency-2024).
 
 ## 2. Data Description and Methodology
 
@@ -336,7 +336,7 @@ The likelihood ratio test indicates that the model with all correlated random ef
 
 ### Interpretation of the Best Model
 
-The best mixed MNL model (`model2.mixed2`) provides insights into heterogeneity in preferences among travelers by estimating random coefficients and their correlations. 
+The best mixed MNL model (`model2.mixed2`) provides insights into heterogeneity in preferences among travelers by estimating random coefficients and their correlations.
 
 ```{r summary of model2.mixed2}
 #| echo: false
@@ -356,7 +356,7 @@ significant_results
 
 The output above contains only the estimates for the standard deviations and correlations with statistically significant p-values ($< 0.05$), illustrating the most relevant heterogeneity in preferences among respondents and associations among attributes.
 
-Once again, the results show that the standard deviations of random coefficients are statistically significant almost for all the attributes, indicating substantial heterogeneity in preferences among respondents. Interestingly, there exists some variability in the higher price range, with the `Price1500` and `Price2500` coefficients having significant standard deviations, but low variability in the lower price ranges (insignificant p-values are not shown in the table above). 
+Once again, the results show that the standard deviations of random coefficients are statistically significant almost for all the attributes, indicating substantial heterogeneity in preferences among respondents. Interestingly, there exists some variability in the higher price range, with the `Price1500` and `Price2500` coefficients having significant standard deviations, but low variability in the lower price ranges (insignificant p-values are not shown in the table above).
 
 In addition, the correlations between random coefficients reveal interesting patterns of association among attributes. First, there is a high correlation between the following pairs of destinations: `Portugal-Spain`, `Portugal-Turkey`, `Spain-Turkey`. Primarily, this means that if a consumer prefers one of these options, they are likely to also enjoy the other in the pair. Additionally, offers that combine the destinations should be well received. Second, the positive correlation between `Price1500` and `Price2500` indicates that individuals who prefer/refuse higher-priced options might also prefer/refuse even more expensive alternatives. Moreover, there is a moderate correlation between `Transportplane` and `Transporttrain`, suggesting some alignment in preferences for these two modes of transportation.
 
@@ -368,7 +368,7 @@ par(mfrow = c(4, 3), mar = c(2, 2, 2, 1),  cex.main=0.9)
 plot(model2.mixed2)
 ```
 
-The analysis of the distributions of random coefficients in the best mixed MNL model further reveal several relevant preferences among respondents (see Figure 3-4). First, while the majority of individuals prefer shorter stays, approximately 9% actually favor 10-day stays over 2-day ones. Regarding accommodation, 8% of respondents prefer budget options over 3-star accommodations, yet 96% of respondents prefer 5-star hotels over budget options. In terms of transportation, 22% of respondents prefer traveling by bus over flying, and 67% prefer the bus to the train. When considering destinations, although almost everyone prefers Portugal and Spain over Greece, 27% of respondents actually prefer Greece to Turkey. Finally, the analysis shows a clear preference for cheaper options, as respondents consistently favor lower-priced choices. 
+The analysis of the distributions of random coefficients in the best mixed MNL model further reveal several relevant preferences among respondents (see Figure 3-4). First, while the majority of individuals prefer shorter stays, approximately 9% actually favor 10-day stays over 2-day ones. Regarding accommodation, 8% of respondents prefer budget options over 3-star accommodations, yet 96% of respondents prefer 5-star hotels over budget options. In terms of transportation, 22% of respondents prefer traveling by bus over flying, and 67% prefer the bus to the train. When considering destinations, although almost everyone prefers Portugal and Spain over Greece, 27% of respondents actually prefer Greece to Turkey. Finally, the analysis shows a clear preference for cheaper options, as respondents consistently favor lower-priced choices.
 
 ## 6. Preference Shares and Sensitivity Chart
 
@@ -378,13 +378,13 @@ Another useful approach to assess the role of product attributes consists on usi
 
 The reference package includes the following attributes:
 
-- **Price**: 800,
-- **Duration**: 2 days,
-- **Accommodation**: 5 stars,
-- **Transport**: Plane,
-- **Destination**: Portugal.
+-   **Price**: 800,
+-   **Duration**: 2 days,
+-   **Accommodation**: 5 stars,
+-   **Transport**: Plane,
+-   **Destination**: Portugal.
 
-This package was chosen as the reference based on results from the models fitted earlier. 
+This package was chosen as the reference based on results from the models fitted earlier.
 
 ```{r preference shares}
 #| echo: false
@@ -432,7 +432,7 @@ The table above shows the preference shares for the reference package and the 15
 
 ### Sensitivity Chart
 
-Sensitivity chart is yet another useful tool to visualize how changes in attribute levels affect preference shares. The sensitivity chart below shows the impact of varying attribute levels on the preference shares of the base package (colored in red). 
+Sensitivity chart is yet another useful tool to visualize how changes in attribute levels affect preference shares. The sensitivity chart below shows the impact of varying attribute levels on the preference shares of the base package (colored in red).
 
 ```{r sensitivity chart1}
 #| echo: false
@@ -509,7 +509,6 @@ For accommodations, 3-star accommodations reduce preference share by 22%, sugges
 Regarding trip duration, a 2-day vacation is the most appealing choice, followed by a 10-day trip which reduces preference share by 18%, indicating it is a possible alternative. A 5-day trip decreases the share by 25%, making it the least attractive option.
 
 Finally, price has a significant influence. A price of 500 can increase the preference shares by 11%, indicating that lower pricing strongly enhances attractiveness. A mid-range price of 1500 reduces preference share by 8%, showing relatively small sensitivity, while the highest price option, 2500, reduces preference share by almost 20%, highlighting that higher prices significantly deter preferences.
-
 
 ```{r sensitivity chart}
 #| echo: false
